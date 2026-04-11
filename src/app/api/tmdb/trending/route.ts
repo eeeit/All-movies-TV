@@ -62,7 +62,7 @@ export async function GET(request: Request) {
   if (type !== 'movie' && type !== 'tv') {
     return NextResponse.json(
       { error: 'type 参数必须是 movie 或 tv' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
         message: (error as Error).message || '获取 TMDb 数据失败',
         list: [],
       } as TmdbResult,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

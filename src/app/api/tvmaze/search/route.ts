@@ -24,7 +24,9 @@ interface TvmazeSearchApiResponse {
 }
 
 async function fetchTvmazeSearch(query: string) {
-  const target = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`;
+  const target = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(
+    query
+  )}`;
   const response = await fetch(target);
 
   if (!response.ok) {
@@ -76,7 +78,7 @@ export async function GET(request: Request) {
         message: (error as Error).message || '获取 TVmaze 数据失败',
         list: [],
       } as TvmazeResult,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

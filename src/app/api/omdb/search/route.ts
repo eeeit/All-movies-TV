@@ -34,7 +34,7 @@ async function fetchOmdb(url: string): Promise<OmdbApiResponse> {
 
 async function lookupByTitle(
   query: string,
-  type?: 'movie' | 'series' | 'episode',
+  type?: 'movie' | 'series' | 'episode'
 ) {
   const apiKey = process.env.OMDB_API_KEY || '';
   if (!apiKey) {
@@ -87,14 +87,14 @@ export async function GET(request: Request) {
   if (type && !['movie', 'series', 'episode'].includes(type)) {
     return NextResponse.json(
       { error: 'type 参数必须是 movie、series 或 episode' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   try {
     const data = await lookupByTitle(
       query,
-      type as 'movie' | 'series' | 'episode' | undefined,
+      type as 'movie' | 'series' | 'episode' | undefined
     );
 
     const list: OmdbItem[] =
@@ -136,7 +136,7 @@ export async function GET(request: Request) {
         message: (error as Error).message || '获取 OMDb 数据失败',
         list: [],
       } as OmdbResult,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

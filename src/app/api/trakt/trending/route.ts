@@ -56,7 +56,7 @@ export async function GET(request: Request) {
   if (type !== 'movie' && type !== 'show') {
     return NextResponse.json(
       { error: 'type 参数必须是 movie 或 show' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
           item.ids?.tmdb ||
           item.ids?.tvdb ||
           item.ids?.slug ||
-          '',
+          ''
       ),
       title: (item.title || '').trim(),
       poster: item.images?.poster?.[0] || '',
@@ -98,7 +98,7 @@ export async function GET(request: Request) {
         message: (error as Error).message || '获取 Trakt 数据失败',
         list: [],
       } as TraktResult,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

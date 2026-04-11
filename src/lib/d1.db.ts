@@ -6,6 +6,63 @@ import { Favorite, IStorage, PlayRecord } from './types';
 // 搜索历史最大条数
 const SEARCH_HISTORY_LIMIT = 20;
 
+const D1_SCHEMA_STATEMENTS = [
+  `CREATE TABLE IF NOT EXISTS users (
+  username TEXT PRIMARY KEY,
+  password TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+)`,
+  `CREATE TABLE IF NOT EXISTS play_records (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL,
+  key TEXT NOT NULL,
+  title TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  cover TEXT NOT NULL,
+  year TEXT NOT NULL,
+  index_episode INTEGER NOT NULL,
+  total_episodes INTEGER NOT NULL,
+  play_time INTEGER NOT NULL,
+  total_time INTEGER NOT NULL,
+  save_time INTEGER NOT NULL,
+  search_title TEXT,
+  UNIQUE(username, key)
+)`,
+  `CREATE TABLE IF NOT EXISTS favorites (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL,
+  key TEXT NOT NULL,
+  title TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  cover TEXT NOT NULL,
+  year TEXT NOT NULL,
+  total_episodes INTEGER NOT NULL,
+  save_time INTEGER NOT NULL,
+  UNIQUE(username, key)
+)`,
+  `CREATE TABLE IF NOT EXISTS search_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL,
+  keyword TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  UNIQUE(username, keyword)
+)`,
+  `CREATE TABLE IF NOT EXISTS admin_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  config TEXT NOT NULL,
+  updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+)`,
+  `CREATE INDEX IF NOT EXISTS idx_play_records_username ON play_records(username)`,
+  `CREATE INDEX IF NOT EXISTS idx_favorites_username ON favorites(username)`,
+  `CREATE INDEX IF NOT EXISTS idx_search_history_username ON search_history(username)`,
+  `CREATE INDEX IF NOT EXISTS idx_play_records_username_key ON play_records(username, key)`,
+  `CREATE INDEX IF NOT EXISTS idx_play_records_username_save_time ON play_records(username, save_time DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_favorites_username_key ON favorites(username, key)`,
+  `CREATE INDEX IF NOT EXISTS idx_favorites_username_save_time ON favorites(username, save_time DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_search_history_username_keyword ON search_history(username, keyword)`,
+  `CREATE INDEX IF NOT EXISTS idx_search_history_username_created_at ON search_history(username, created_at DESC)`,
+] as const;
+
 // D1 数据库接口
 interface D1Database {
   prepare(sql: string): D1PreparedStatement;
@@ -39,16 +96,47 @@ interface D1ExecResult {
 
 // 获取全局D1数据库实例
 function getD1Database(): D1Database {
-  return (process.env as any).DB as D1Database;
+  const database = (process.env as any).DB as D1Database | undefined;
+  if (!database) {
+    throw new Error('D1 binding DB is not configured');
+  }
+
+  return database;
+}
+
+async function initializeD1Schema(db: D1Database): Promise<void> {
+  for (let index = 0; index < D1_SCHEMA_STATEMENTS.length; index += 1) {
+    const statement = D1_SCHEMA_STATEMENTS[index];
+    try {
+      await db.exec(statement);
+    } catch (error) {
+      const compactStatement = statement.replace(/\s+/g, ' ').trim();
+      throw new Error(
+        `D1 schema init failed at statement ${
+          index + 1
+        }: ${compactStatement}. ${(error as Error).message}`
+      );
+    }
+  }
 }
 
 export class D1Storage implements IStorage {
   private db: D1Database | null = null;
+  private schemaInitPromise: Promise<void> | null = null;
 
   private async getDatabase(): Promise<D1Database> {
     if (!this.db) {
       this.db = getD1Database();
     }
+
+    if (!this.schemaInitPromise) {
+      this.schemaInitPromise = initializeD1Schema(this.db).catch((error) => {
+        this.schemaInitPromise = null;
+        throw error;
+      });
+    }
+
+    await this.schemaInitPromise;
     return this.db;
   }
 
