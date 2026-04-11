@@ -41,8 +41,6 @@ export const viewport: Viewport = {
   themeColor: '#000000',
 };
 
-export const runtime = 'edge';
-
 export default async function RootLayout({
   children,
 }: {
