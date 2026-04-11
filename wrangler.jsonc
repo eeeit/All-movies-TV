@@ -10,5 +10,12 @@
   },
   "build": {
     "command": "npx @opennextjs/cloudflare build --dangerouslyUseUnsupportedNextVersion"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "moontv",
+      "database_id": "00000005-00000000-0000504a-7492977a8a05f2ce5f58601944182c8f"
+    }
+  ]
 }
