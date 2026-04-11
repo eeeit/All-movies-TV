@@ -43,9 +43,6 @@ async function fetchDoubanData(url: string): Promise<DoubanApiResponse> {
     throw error;
   }
 }
-
-export const runtime = 'edge';
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 

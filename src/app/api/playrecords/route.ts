@@ -5,9 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { PlayRecord } from '@/lib/types';
-
-export const runtime = 'edge';
-
 export async function GET(request: NextRequest) {
   try {
     // 从 cookie 获取用户信息

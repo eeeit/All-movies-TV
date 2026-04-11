@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 
 import { getCacheTime } from '@/lib/config';
 import { TmdbItem, TmdbResult } from '@/lib/types';
-
-export const runtime = 'edge';
-
 interface TmdbTrendingApiResponse {
   results: Array<{
     id: number;

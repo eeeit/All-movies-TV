@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 
 import { getCacheTime } from '@/lib/config';
 import { OmdbItem, OmdbResult } from '@/lib/types';
-
-export const runtime = 'edge';
-
 interface OmdbApiResponse {
   Response: 'True' | 'False';
   Title?: string;

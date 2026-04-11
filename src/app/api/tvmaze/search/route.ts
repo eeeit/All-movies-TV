@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 
 import { getCacheTime } from '@/lib/config';
 import { TvmazeItem, TvmazeResult } from '@/lib/types';
-
-export const runtime = 'edge';
-
 interface TvmazeSearchApiResponse {
   score: number;
   show: {
