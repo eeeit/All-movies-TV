@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>天下影视 - Movie Streaming Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'custom-bg': '#121212',
+            'custom-surface': '#1e1e1e',
+            'custom-primary': '#f0b90b',
+            'custom-text-main': '#ffffff',
+            'custom-text-muted': '#a0a0a0',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-utilities">
+    /* Custom scrollbar for webkit */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #121212; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333; 
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; 
+    }
+    
+    .aspect-poster {
+      aspect-ratio: 2 / 3;
+    }
+    .aspect-banner {
+      aspect-ratio: 16 / 5;
+    }
+    .aspect-landscape {
+      aspect-ratio: 16 / 9;
+    }
+  </style>
+</head>
+<body class="bg-custom-bg text-custom-text-main font-sans min-h-screen">
+<!-- BEGIN: Top Navigation -->
+<header class="sticky top-0 z-50 bg-custom-bg/90 backdrop-blur-md border-b border-custom-surface px-6 py-4 flex items-center justify-between">
+<!-- Logo -->
+<div class="flex items-center gap-2 text-2xl font-bold text-custom-primary cursor-pointer">
+<i class="fa-solid fa-play-circle text-3xl"></i>
+<span>天下影视</span>
+</div>
+<!-- Search Bar -->
+<div class="flex-1 max-w-2xl mx-8 hidden md:block">
+<div class="relative group">
+<input class="w-full bg-custom-surface border-none rounded-full py-2.5 pl-5 pr-12 text-sm text-custom-text-main placeholder-custom-text-muted focus:ring-1 focus:ring-custom-primary transition-all" placeholder="搜索电影、电视剧、综艺..." type="text"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-custom-text-muted hover:text-custom-primary transition-colors">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-6 text-custom-text-muted">
+<!-- Language Toggle -->
+<div class="flex items-center text-sm border border-custom-surface rounded-md overflow-hidden">
+<button class="px-2 py-1 bg-custom-surface text-custom-primary">CN</button>
+<div class="w-px h-4 bg-gray-600"></div>
+<button class="px-2 py-1 hover:text-custom-text-main transition-colors">EN</button>
+</div>
+<!-- Theme Toggle -->
+<div class="flex items-center bg-custom-surface rounded-full p-1 hidden sm:flex">
+<button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-sm">
+<i class="fa-solid fa-sun text-sm"></i>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:text-custom-text-main transition-colors">
+<i class="fa-solid fa-moon text-sm"></i>
+</button>
+</div>
+<!-- Icons -->
+<div class="flex items-center gap-4 text-lg">
+<button class="hover:text-custom-text-main transition-colors" title="History"><i class="fa-solid fa-clock-rotate-left"></i></button>
+<button class="hover:text-custom-text-main transition-colors" title="Favorites"><i class="fa-regular fa-bookmark"></i></button>
+<button class="hover:text-custom-text-main transition-colors relative" title="Notifications">
+<i class="fa-regular fa-bell"></i>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+<button class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm ml-2 hover:ring-2 ring-custom-primary transition-all">
+<i class="fa-solid fa-user"></i>
+</button>
+</div>
+</div>
+</header>
+<!-- END: Top Navigation -->
+<!-- BEGIN: Main Content Area -->
+<main class="max-w-[1600px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-4 gap-8">
+<!-- Left Main Column -->
+<div class="lg:col-span-3 space-y-10">
+<!-- BEGIN: Hero Banner -->
+<section class="relative w-full aspect-banner rounded-2xl overflow-hidden group cursor-pointer shadow-2xl">
+<img alt="Hero Banner" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2mKN7BHUcYlvLYC324X8X65wEdof2-TCFB3yzxr_SBkzkPZbR8rfpo9fXKseYec4z-duNc4xvMaGkbMUY6DCnrWCkKncsY-XodVBTAsc8eaoE4j-yQCin_xU3AytUNh_H9Laj0F1aqcPTEe81itvvqqq3WMius8LDpYISkJxQ8f5cqoVP2ILDwqrknv4hEMpRM_GAHZzj24stIT657gjjsp_8bOegijYYpK7ITZgXCI1uaZ_a3Me-Hlhj-0JJznviWbDC3xVfkw"/>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<!-- Banner Content -->
+<div class="absolute inset-y-0 left-0 p-10 flex flex-col justify-center w-full md:w-2/3">
+<h1 class="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">封神第一部: 朝歌风云</h1>
+<p class="text-lg text-gray-300 mb-8 max-w-xl line-clamp-2 drop-shadow-md">神话史诗，震撼上映。商王殷寿勾结狐妖妲己，暴虐无道，引发天谴。昆仑仙人姜子牙携“封神榜”下山，寻找天下共主...</p>
+<div class="flex items-center gap-4">
+<button class="bg-custom-primary text-black font-bold py-3 px-8 rounded-full hover:bg-yellow-400 transition-colors flex items-center gap-2 shadow-lg shadow-custom-primary/30">
+<i class="fa-solid fa-play"></i> 立即观看
+            </button>
+<button class="bg-white/20 backdrop-blur-sm border border-white/30 text-white font-medium py-3 px-8 rounded-full hover:bg-white/30 transition-colors flex items-center gap-2">
+<i class="fa-solid fa-info-circle"></i> 详情
+            </button>
+</div>
+</div>
+<!-- Carousel Indicators -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+<button class="w-6 h-1.5 bg-custom-primary rounded-full"></button>
+<button class="w-2 h-1.5 bg-white/50 rounded-full hover:bg-white/80 transition-colors"></button>
+<button class="w-2 h-1.5 bg-white/50 rounded-full hover:bg-white/80 transition-colors"></button>
+<button class="w-2 h-1.5 bg-white/50 rounded-full hover:bg-white/80 transition-colors"></button>
+</div>
+<!-- Arrows -->
+<button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 backdrop-blur-sm">
+<i class="fa-solid fa-chevron-left"></i>
+</button>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 backdrop-blur-sm">
+<i class="fa-solid fa-chevron-right"></i>
+</button>
+</section>
+<!-- END: Hero Banner -->
+<!-- BEGIN: Hot Movies -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-2xl font-bold flex items-center gap-2">
+            热门电影 <i class="fa-solid fa-fire text-custom-primary text-lg"></i>
+</h2>
+<a class="text-sm text-custom-text-muted hover:text-custom-primary flex items-center gap-1 transition-colors" href="#">
+            更多 <i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+<!-- Filters -->
+<div class="flex gap-4 mb-6 text-sm">
+<button class="px-4 py-1.5 rounded-full bg-custom-primary text-black font-medium">全部</button>
+<button class="px-4 py-1.5 rounded-full bg-custom-surface text-custom-text-muted hover:text-white transition-colors">动作</button>
+<button class="px-4 py-1.5 rounded-full bg-custom-surface text-custom-text-muted hover:text-white transition-colors">喜剧</button>
+<button class="px-4 py-1.5 rounded-full bg-custom-surface text-custom-text-muted hover:text-white transition-colors">科幻</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Movie Item 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-poster rounded-xl overflow-hidden mb-2">
+<img alt="流浪地球2" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmKn8Hec8gt0pdl6cTR3Evo3Bk7urwqx9uxTHRAxPL5cY9KFE0qmA07bmn89DR7II74HfBpuu3E4Gt6MTWAY4yXqO6Rfv47b1fS-NkvWRZ2edcJB1QnK5cxItKPYYJoRVCLGoPFmw6oQXlub3avywgDx1Dm9tymiCsysbVTL7-kmPw4Ubo1xnZ7PHWC92kJMCIZ2UBOFENas_9bBDWT5fSU7pf_WUyiMp0NdHrxtZAUwTo1tKLLZV-rJQtM68HeMkVE1ET4KVjIg"/>
+<div class="absolute top-2 right-2 bg-black/70 text-custom-primary font-bold px-2 py-0.5 rounded text-sm backdrop-blur-sm">9.2</div>
+<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<i class="fa-regular fa-circle-play text-4xl text-white"></i>
+</div>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">流浪地球2</h3>
+<p class="text-xs text-custom-text-muted mt-1">科幻 / 冒险</p>
+</div>
+<!-- Movie Item 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-poster rounded-xl overflow-hidden mb-2">
+<img alt="满江红" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPaFzkpiqPXF2ejS8NMAT1GplWwgM_IdxVqB_IdpXpQNhU4x7TEk0cRQhukL57h1EkxQBoBcH8h4bfpjKTZ1_TwMmngH4UyS5MeX9h5fGD4h2rAYwpa1PkbIN5WtbOPKeC-Y-q8m-bvf8mVxZ31Jb8PfSixaPZ5VByUkSwJ9KPF2Q2KjQdlofHEBxNefT58kHdN8A_0caXVdSJE113MNwj7NShPaEkqkAk7FOK3R6PwEx466AgyTSoHxlqZMlR8IDIRKagx1vnSA"/>
+<div class="absolute top-2 right-2 bg-black/70 text-custom-primary font-bold px-2 py-0.5 rounded text-sm backdrop-blur-sm">9.0</div>
+<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<i class="fa-regular fa-circle-play text-4xl text-white"></i>
+</div>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">满江红</h3>
+<p class="text-xs text-custom-text-muted mt-1">喜剧 / 悬疑</p>
+</div>
+<!-- Movie Item 3 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-poster rounded-xl overflow-hidden mb-2">
+<img alt="无名" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOSvlSAzquNtMkjXQ28Mb1pZpU2DbmlgBnb9Y4O7LYFolP-wTWGviwrUSEWMiVxgC7ktrG61QzKHJUeBCkJNnAvP5DHFSwDCkmh5j48YUdJp0lc7Ok-2hlr89hkrvRM5EZs7UbXe0G5GCHC9X5G6am9f-OQ1awvDG2OCJWd61nsK-v_kHKLiGhi4VqvcZziM0IwEsFeAvid6FoKY7bkIRXmBEodzMZ6_XqQOB4ZSMCQFerSeq7eKhOAPPFCvxiMdv5XwoQp144iw"/>
+<div class="absolute top-2 right-2 bg-black/70 text-custom-primary font-bold px-2 py-0.5 rounded text-sm backdrop-blur-sm">8.8</div>
+<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<i class="fa-regular fa-circle-play text-4xl text-white"></i>
+</div>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">无名</h3>
+<p class="text-xs text-custom-text-muted mt-1">剧情 / 历史</p>
+</div>
+<!-- Movie Item 4 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-poster rounded-xl overflow-hidden mb-2">
+<img alt="Movie 4" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARas6iyQ_EcwiYzpUfj9kkehgHgKcWIVXhSRg0eduVqQk0MD6XHJ7Bw0FHBmr0x-v7FL9d4s-bIB338NJHReJFUJ7XSyffYlORWnWbTbpUSzpESGEBjdCfueX5UJiA45mAYsKmbLWOIqi_fN2WublWeHby2CtAGVclC9bTJQHH2vwYKFo1lxArJkwTnQkfAOVrKXZUw_TmJx6_2H-LSu-my3KAepxdpkBFZWl0E7zzWfCddmpetwBFaWxt5F9WZh5lKFsL1ikt_A"/>
+<div class="absolute top-2 right-2 bg-black/70 text-custom-primary font-bold px-2 py-0.5 rounded text-sm backdrop-blur-sm">8.5</div>
+<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<i class="fa-regular fa-circle-play text-4xl text-white"></i>
+</div>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">深海</h3>
+<p class="text-xs text-custom-text-muted mt-1">动画 / 奇幻</p>
+</div>
+</div>
+</section>
+<!-- END: Hot Movies -->
+<!-- BEGIN: Hot TV Shows & Variety (Split Row) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Hot TV Shows -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-2xl font-bold">热播剧集</h2>
+<a class="text-sm text-custom-text-muted hover:text-custom-primary flex items-center gap-1 transition-colors" href="#">
+              更多 <i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- TV Show 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-square rounded-xl overflow-hidden mb-2">
+<img alt="狂飙" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7l2EbNJkQQHYq8Kno2WHMbmU1caQDgEZBhNUbYWK06quil1CK-DdLch5myUiKHa9V5Kxi3Gvt0l1TotQ2yDOAPPK_SKWxnd2dWujyRC_KN9AY-4nF2PvUigniu5uWNv45kab-A7HrRwUHcfV5wdx_xqMhwrFXUAI--h1JtOVVkxInxgRjTKVOhCu880wcQpPVyxqkL7VhlMcODZGLMRveDwIsSd58YC-0SOl0BK7qaz0c8m2OtyCTH-22JZP-OXNXScnH7JC3Lw"/>
+<div class="absolute bottom-2 right-2 bg-black/70 text-white px-1.5 py-0.5 rounded text-xs backdrop-blur-sm">39集全</div>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">狂飙</h3>
+</div>
+<!-- TV Show 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-square rounded-xl overflow-hidden mb-2">
+<img alt="三体" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCB3A5O_yArEv480eAmz-Q5Cb_Ulyp0gpy79SOKmIuUX4VYG02oe44G-yoo4ruNpyK76bMjOTTtHBLC_fSUIj9bGIP-apCrgTyh9ZqooWIHr1O_pBMhtDMJm3xU5X8U-xko0kG8LTasrJMnwAi5EQXUL-DWGcjsFciolbxMpBcPD09_1FtQ_9KLleOAb7SO1ZwG2HdhrqbhvaMGLUUxCbMbR9ydQRFCzFy-elSLr14ryGrUtANPQkwp_6-tW4-1sx-GWrVNpWOpvQ"/>
+<div class="absolute bottom-2 right-2 bg-black/70 text-white px-1.5 py-0.5 rounded text-xs backdrop-blur-sm">30集全</div>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">三体</h3>
+</div>
+</div>
+</section>
+<!-- Variety Shows -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-2xl font-bold">综艺节目</h2>
+<a class="text-sm text-custom-text-muted hover:text-custom-primary flex items-center gap-1 transition-colors" href="#">
+              更多 <i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Variety 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-landscape rounded-xl overflow-hidden mb-2">
+<img alt="乘风破浪的姐姐" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5Mrc0ClC4NYDdtKpnCQjhWEIQQYyay_nlnm-crvs3HiMeObkWvNtv9zkSmwjmHEJXywhgGYysmyoJfEWcalCEozLH1t1gM5H8c3nRW_DRq1pPHCdqbYYElFg9tGxRY1qpidFW5iPejsDLiRxDD1ccEFsR-45AiARKvOIO0_J-YLJrlMrMHkJL3Xf-1NXHIPJiMqyY8KNDDo8jly_awgB-U6-fT-3mHLJYt87_-BUo83q7NOOxrVyi9NCBOfTwgPZh_7RHgG3Z_g"/>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">乘风破浪的姐姐</h3>
+</div>
+<!-- Variety 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-landscape rounded-xl overflow-hidden mb-2">
+<img alt="奔跑吧" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnRS10qrlzr527Kpy9HRRLwCgCz2HJyDHnq9OX3fvsuatpBejBf_TTDPv9e3DfKjFKegGGJt_n5bXdjMuOaMV50ka08RBdFKaNgUWX-c2hrMAy43K39TOBeSLPeRXqcA-JUheacfzkUwR_hK49TjeAasA8rbv6dEZR_wgeJ84lKwc1Dp8xRDXN3ym5a0EwIVKLE8gUGrnPIkHdYL2t_Te9zQi4yMS0wrEV0a-09G0M-hrrCSIZQU_jhWIoLO5bppUUHBu7dBu9wg"/>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">奔跑吧</h3>
+</div>
+</div>
+</section>
+</div>
+<!-- END: Hot TV Shows & Variety -->
+<!-- BEGIN: Newly Added -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-2xl font-bold">最新上线</h2>
+<a class="text-sm text-custom-text-muted hover:text-custom-primary flex items-center gap-1 transition-colors" href="#">
+            更多 <i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- New Item 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-landscape rounded-xl overflow-hidden mb-2">
+<img alt="New Item 1" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDp4yaMno-XrJEK2ScpCnPsGqoAml9GASru_gH36L_twBgJe2ZtXtqTUClgBrM_hLHaKnf5bUbAOscmmnVPZBk4xWcvnnIsqIvH7qI-pOpsGNxqw1dk-G4AQTOoRv9nkn1D1o61XxlS33B0HDFAYlOF0-zw0e-zTYeuR2i9LuOQbSX8ZdtofOvX79V0fNkwG9t4h_-27ditpeV3bY8B5h2QxzSM5QEHGqmoSXNc3VLtGzEMaiPMD0dnTSipZifzRV6Q1V28n_E3w"/>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">最新上架电影1</h3>
+</div>
+<!-- New Item 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-landscape rounded-xl overflow-hidden mb-2">
+<img alt="New Item 2" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfE9pVK2cdFAn1xASg7LZY3OqKMHV_oJxUsM9otD3JqgPK1_CsnIyJyMLEDSgcAM36BqKKB8NmIiyUJL1EFnjGUx8WdtbSEq87Zh6UyPzPOHsy_gxvI6vQl79dtpFd4Aa8CZMUKm2aF8vwfeKrp-PnriUHfmcvxtpm0RkX_SeUz_omr33OtM-vSfqi3jyTzjRd4X3WFcWMOB4hD8aYiuijdmTSHhB-qedMVFfrNLcD3ETPBxE11h5URs0KTkXxcIE5OfZ1re7PLw"/>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">最新上架剧集2</h3>
+</div>
+<!-- New Item 3 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-landscape rounded-xl overflow-hidden mb-2">
+<img alt="New Item 3" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhPImpnkDR7tEWgF3m55i1oN9NFLLRP1Kl-3Tsl3lR5mEEg6F007z9D1Pf8cxFNfglXGePcw4K3_wSoGrNmiyXs9guepwcAxUR1GBeO7H4GWaqgR-13fKYqGprgftdx2rNv2E5KC9sWcqd4AOzaUzRGnpRoqpwHt-WjqLIOMo5kDa6Wp8uB7mf0DiiCzV54gxfOZQLzWapUMQwIMiWLGoF9NhLPAMSCc_9Qph7iirTKR_y0EgKun1C04AmJOqSHO5mnLL1s43j5w"/>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">最新综艺3</h3>
+</div>
+<!-- New Item 4 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-landscape rounded-xl overflow-hidden mb-2">
+<img alt="New Item 4" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTpquuvqNsHlj83kJpCqP5nhTeBEdV2NB10VNQSnYTw1hKaJRXYprv9giwi7hlOvETv-PSpo5Ux0E51v7Eana8f_JxNIYL0yzU5WFtg3Uo4EitRz_2FrguSNzlwlcLOA-WXLyt2jn3YIdb7b_GKnfX-dZEKW3--VYGk72owx_PqDhsFWnF8lv7XLg5pWK7yRVetPOvoK0T4e1WDkjyjtCZZYnuxlMtVN_cp615TxglHuN0k2MtGhX6TMPLtxcmcfvju9Pa71YI6A"/>
+</div>
+<h3 class="font-medium text-white truncate group-hover:text-custom-primary transition-colors">最新纪录片4</h3>
+</div>
+</div>
+</section>
+<!-- END: Newly Added -->
+</div>
+<!-- End Left Main Column -->
+<!-- BEGIN: Right Sidebar -->
+<aside class="space-y-6">
+<!-- BEGIN: Ranking Widget -->
+<div class="bg-custom-surface rounded-2xl p-5 border border-white/5">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold flex items-center gap-2">
+            排行榜 <i class="fa-solid fa-chart-simple text-custom-primary"></i>
+</h2>
+<a class="text-xs text-custom-text-muted hover:text-white" href="#">更多 <i class="fa-solid fa-angle-right"></i></a>
+</div>
+<ul class="space-y-4">
+<!-- Rank 1 -->
+<li class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-xl font-bold text-yellow-500 w-6 text-center"><i class="fa-solid fa-crown text-sm"></i> 1</span>
+<div>
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors">封神第一部: 朝歌风云</h4>
+</div>
+</div>
+<span class="text-custom-primary font-bold text-sm">9.2</span>
+</li>
+<!-- Rank 2 -->
+<li class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-lg font-bold text-gray-300 w-6 text-center">2</span>
+<div>
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors">满江红</h4>
+</div>
+</div>
+<span class="text-custom-primary font-bold text-sm">9.0</span>
+</li>
+<!-- Rank 3 -->
+<li class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-lg font-bold text-orange-400 w-6 text-center">3</span>
+<div>
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors">流浪地球2</h4>
+<p class="text-xs text-custom-text-muted truncate w-32">科幻巨制，震撼视觉</p>
+</div>
+</div>
+<span class="text-custom-primary font-bold text-sm">8.8</span>
+</li>
+<!-- Rank 4 -->
+<li class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="font-bold text-custom-text-muted w-6 text-center">4</span>
+<h4 class="text-sm text-gray-300 group-hover:text-white transition-colors">狂飙</h4>
+</div>
+<span class="text-custom-primary font-bold text-sm">8.8</span>
+</li>
+<!-- Rank 5 -->
+<li class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="font-bold text-custom-text-muted w-6 text-center">5</span>
+<h4 class="text-sm text-gray-300 group-hover:text-white transition-colors">无名</h4>
+</div>
+<span class="text-custom-primary font-bold text-sm">8.8</span>
+</li>
+<!-- Rank 6-10 Simplified -->
+<li class="flex items-center justify-between group cursor-pointer"><div class="flex items-center gap-3"><span class="text-custom-text-muted w-6 text-center">6</span><h4 class="text-sm text-gray-300 group-hover:text-white">乘风破浪的姐姐</h4></div><span class="text-custom-primary text-sm">8.5</span></li>
+<li class="flex items-center justify-between group cursor-pointer"><div class="flex items-center gap-3"><span class="text-custom-text-muted w-6 text-center">7</span><h4 class="text-sm text-gray-300 group-hover:text-white">三体</h4></div><span class="text-custom-primary text-sm">8.5</span></li>
+<li class="flex items-center justify-between group cursor-pointer"><div class="flex items-center gap-3"><span class="text-custom-text-muted w-6 text-center">8</span><h4 class="text-sm text-gray-300 group-hover:text-white">深海</h4></div><span class="text-custom-primary text-sm">8.2</span></li>
+<li class="flex items-center justify-between group cursor-pointer"><div class="flex items-center gap-3"><span class="text-custom-text-muted w-6 text-center">9</span><h4 class="text-sm text-gray-300 group-hover:text-white">长安三万里</h4></div><span class="text-custom-primary text-sm">8.9</span></li>
+</ul>
+</div>
+<!-- END: Ranking Widget -->
+<!-- BEGIN: Editor's Picks -->
+<div class="bg-custom-surface rounded-2xl p-5 border border-white/5">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold flex items-center gap-2">编辑精选</h2>
+<a class="text-xs text-custom-text-muted hover:text-white" href="#">推荐 <i class="fa-solid fa-angle-right"></i></a>
+</div>
+<div class="space-y-4">
+<!-- Pick 1 -->
+<div class="flex gap-3 group cursor-pointer">
+<div class="w-24 aspect-landscape rounded-lg overflow-hidden shrink-0">
+<img alt="Pick 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdqbTqPnTaR38C_I3RWMFGLf1bORMMpTtjcjCx7MG2TAH6ZsWo9aJSKVGR5_Aq6qNqm6Gxm_IYGlDQXBng4ByEQF2bqflglMK1LnYXBBYvD2_xmBmu0ED1AFjJ589OKOIoH1URtWL0mKEUqLEb1dYJnsM5nqd_RD5CtpFH7qwr5XsIDje3OGlJCvutdPz_qtPp5mBkgp10kwyOFZoKCsHXEC3Ug4-f8HAymjSfmC2SFbFUEJ6jHbuMH54oQTGYCWNn9PeEvQq3tQ"/>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors line-clamp-1">去有风的地方</h4>
+<p class="text-xs text-custom-text-muted mt-1 line-clamp-1">治愈系慢生活剧集...</p>
+</div>
+</div>
+<!-- Pick 2 -->
+<div class="flex gap-3 group cursor-pointer">
+<div class="w-24 aspect-landscape rounded-lg overflow-hidden shrink-0">
+<img alt="Pick 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2ZfaxuLV4OS6ZQ4eFpKcPppWpnpE6GqwuTRfU1USfx7six-HzXLobspJ_zD0NLdv595oxjeHZRic4J8nFkabdM7LxEoZvfUfyCTU6vHGjsyA53yUFk849vO3EE-TEt458Ey4LXPBCd0e7OgFKopRJvTi9OjzVS-keTTG2Bf_U4EHdrsqTnY8RDN9wHPvMq-ZcnmwRWoDKQVXUgNUNsHGe4s03RPoGAefBl01xikLO3-rc4FWS4Pucq-_Ao9jEJZq91P3o219NZw"/>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors line-clamp-1">半个喜剧</h4>
+<p class="text-xs text-custom-text-muted mt-1 line-clamp-1">开心麻花年度力作...</p>
+</div>
+</div>
+<!-- Pick 3 -->
+<div class="flex gap-3 group cursor-pointer">
+<div class="w-24 aspect-landscape rounded-lg overflow-hidden shrink-0">
+<img alt="Pick 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz5XXFRf53bLv0i8TI3K1Q9S8hGWly8ubBHNJ5C0SVKZwLzNV9ngrmJDcSW0fupZHMVixH9Ow4BrjAQtoEJdTtMosmWyZrcngOoRuYLUrmGkDb-3ykQhMtTJSNGvXwAtQdwrEXB_g3N-rTiJGN8EonOpDoYJ4S3YsRjv8_qdFsHrhuSTPztwoKPz8BJp0BtutgPwAgXcmLOVWCaWjYvJnUSs0WMPo6K0m6mUV7nzfIv4Uw3-L68li444GFJ2wIDMslekqFifnUDQ"/>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors line-clamp-1">宇宙探索编辑部</h4>
+<p class="text-xs text-custom-text-muted mt-1 line-clamp-1">荒诞又浪漫的科幻...</p>
+</div>
+</div>
+<!-- Pick 4 -->
+<div class="flex gap-3 group cursor-pointer">
+<div class="w-24 aspect-landscape rounded-lg overflow-hidden shrink-0">
+<img alt="Pick 4" class="w-full h-full object-cover group-hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjE3SMguvCQfNF9zmDXr01gjKZe0JNiB6HzXpl4UzNTA5F4UwoOCpBnYs4f1TK7LZYjbkMm8cvYgUimJcjd644OhuOHVSpffuvfuwxbK5mje9Afk2yL3ld6MqKhw2OCzF_khac12rhXtIVqN0uhsLLgvU-B7zksqo5xTmjgNBP8O8P_wRnzEygkGjtnLvGfw1MNYIt3AHMCGDZry3WJeR36M7mceP1dXpGumhTQRnks9_JR3Tq1ofkAdSwRUpsV6FEQ1cfDpMwKw"/>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="text-sm font-medium text-white group-hover:text-custom-primary transition-colors line-clamp-1">隐入尘烟</h4>
+<p class="text-xs text-custom-text-muted mt-1 line-clamp-1">感受土地深情与真挚...</p>
+</div>
+</div>
+</div>
+</div>
+<!-- END: Editor's Picks -->
+</aside>
+<!-- END: Right Sidebar -->
+</main>
+<!-- END: Main Content Area -->
+</body></html>

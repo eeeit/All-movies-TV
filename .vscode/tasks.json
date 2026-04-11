@@ -1,0 +1,1085 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "local-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"pnpm install --frozen-lockfile && pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "check-node-env",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"node -v && npm -v && corepack -v"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "enable-pnpm-and-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack enable && corepack prepare pnpm@10.12.4 --activate && pnpm install --frozen-lockfile && pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "corepack-pnpm-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm install --frozen-lockfile && corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "rebuild-after-fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "rebuild-after-syntax-fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "rebuild-after-type-fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "check-npm-prefix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npm config get prefix"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "install-local-pnpm",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npm install -g pnpm@10.12.4 --prefix C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "final-pages-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-webpack-build",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-ChildItem -Force 'E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.30_@babel+core@7._9960d4ec3ace0dc381872aaaee443d1f\\node_modules\\next\\dist\\build\\webpack-build' | Select-Object Name,Length"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-next-pnpm-path",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-ChildItem 'E:\\MoonTV-main\\node_modules\\.pnpm' -Directory | Where-Object { $_.Name -like 'next@14.2.30*' } | Select-Object -ExpandProperty Name"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-next-pnpm-path-cmd",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /b /ad E:\\MoonTV-main\\node_modules\\.pnpm | findstr /b next@14.2.30"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-build-dir",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /b /ad E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.30_@babel+core@7._9960d4ec3ace0dc381872aaaee443d1f\\node_modules\\next\\dist\\build"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-dist-dir",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /b /ad E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.30_@babel+core@7._9960d4ec3ace0dc381872aaaee443d1f\\node_modules\\next\\dist"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-link",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /al E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.30_@babel+core@7._9960d4ec3ace0dc381872aaaee443d1f\\node_modules"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-node_modules-all",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.30_@babel+core@7._9960d4ec3ace0dc381872aaaee443d1f\\node_modules"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-package-contents",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.30_@babel+core@7._9960d4ec3ace0dc381872aaaee443d1f\\node_modules\\next"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-root-next-link",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\next"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-next-package-path",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"node -p \"require.resolve('next/package.json')\""
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-next-package-path-node",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"-p",
+				"require.resolve('next/package.json')"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-next-package-path-node2",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"-e",
+				"console.log(require.resolve('next/package.json'))"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-next-package-path-node3",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"node -e \"console.log(require.resolve('next/package.json'))\""
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "pin-next-version",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm add next@14.2.23 eslint-config-next@14.2.23"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "find-picocolors",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /b E:\\MoonTV-main\\node_modules\\.pnpm | findstr /i picocolors"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "resolve-picocolors-root",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /b E:\\MoonTV-main\\node_modules | findstr /i picocolors"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-tailwind-picocolors-link",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\tailwindcss@3.4.17_ts-node@_a000dfa55c9a776c830690ea08d87523\\node_modules\\tailwindcss"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-tailwind-node-modules",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\tailwindcss@3.4.17_ts-node@_a000dfa55c9a776c830690ea08d87523\\node_modules"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "retry-pages-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-styled-jsx-link",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "find-styled-jsx-dir",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /b /ad E:\\MoonTV-main\\node_modules\\.pnpm | findstr /i \"styled-jsx@5.1.1\""
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-styled-jsx-package",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\styled-jsx@5.1.1_@babel+core@7.27.4_react@18.3.1\\node_modules\\styled-jsx"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-styled-jsx-root",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\styled-jsx@5.1.1_@babel+core@7.27.4_react@18.3.1\\node_modules"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "force-reinstall-deps",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm install --force"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "final-build-after-force-reinstall",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "locate-global-pnpm",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /s /b C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global\\pnpm*"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "locate-global-pnpm-bin",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /s /b C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global\\*pnpm*"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "verify-pnpm-on-path",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && pnpm --version"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "build-with-skip-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm run pages:build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-package-after-force",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-dist-after-force",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next\\dist"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-webpack-build-after-force",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next\\dist\\build\\webpack-build"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "check-next-files-exist",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"if exist E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next\\package.json (echo package-json-yes) else (echo package-json-no) && if exist E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next\\dist\\build\\webpack-build\\index.js (echo webpack-index-yes) else (echo webpack-index-no) && if exist E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next\\dist\\build\\webpack-build\\impl.js (echo impl-yes) else (echo impl-no)"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "check-styled-jsx-files-exist",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"if exist E:\\MoonTV-main\\node_modules\\.pnpm\\styled-jsx@5.1.1_@babel+core@7.27.4_react@18.3.1\\node_modules\\styled-jsx\\package.json (echo styled-package-json-yes) else (echo styled-package-json-no)"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "query-next-reparse",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"fsutil reparsepoint query E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "query-styled-reparse",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"fsutil reparsepoint query E:\\MoonTV-main\\node_modules\\.pnpm\\styled-jsx@5.1.1_@babel+core@7.27.4_react@18.3.1\\node_modules\\styled-jsx"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "scan-next-package-files",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /s /b E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3\\node_modules\\next"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-next-store-root",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\next@14.2.23_@babel+core@7._b89aafa1f32eef87091cc0824473ffc3"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "inspect-styled-store-root",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /a E:\\MoonTV-main\\node_modules\\.pnpm\\styled-jsx@5.1.1_@babel+core@7.27.4_react@18.3.1"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "prefer-online-reinstall",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=C:\\Users\\Administrator\\AppData\\Roaming\\pnpm-global;%PATH%\" && corepack pnpm install --force --prefer-online"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "npm-reinstall",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"npm install --no-package-lock --legacy-peer-deps"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "env-check",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"node -v && npm -v && pnpm -v && corepack pnpm -v && nvm version && nvm list"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "env-check-2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"(where node) & (where corepack) & (where npm) & (where nvm) & (node -v) & (npm -v) & (corepack pnpm -v) & (nvm version) & (nvm list)"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pnpm-reinstall-force",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm install --force --frozen-lockfile"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-final",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "enable-pnpm-shim",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack enable pnpm && where pnpm && pnpm -v"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-pnpm-check",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\node_modules\\.bin;%PATH%\" && bash -lc \"pnpm --version\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-pnpm-check-2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\node_modules\\.bin;%PATH%\" && bash -lc \"pnpm --version && pnpm -v\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-which-pnpm",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\node_modules\\.bin;%PATH%\" && bash -lc \"echo PATH=$PATH; type -a pnpm; which pnpm; ls -l /e/MoonTV-main/node_modules/.bin/pnpm*\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-which-pnpm-2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\node_modules\\.bin;%PATH%\" && bash -lc \"pwd && command -v pnpm && ls -l /e/MoonTV-main/node_modules/.bin/pnpm*\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-which-pnpm-3",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\node_modules\\.bin;%PATH%\" && bash -lc 'pwd; command -v pnpm; ls -l /e/MoonTV-main/node_modules/.bin/pnpm*'"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-direct-pnpm-check",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/node_modules/.bin:$PATH\"; pwd; command -v pnpm; ls -l /e/MoonTV-main/node_modules/.bin/pnpm /e/MoonTV-main/node_modules/.bin/pnpm.cmd; pnpm --version; pnpm -v"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-final-2",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/node_modules/.bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pnpm-store-path",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm store path"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "deps-clean-reset",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"if exist node_modules rmdir /s /q node_modules & if exist .next rmdir /s /q .next & if exist E:\\.pnpm-store\\v10 rmdir /s /q E:\\.pnpm-store\\v10"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pnpm-reinstall-fresh",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm install --frozen-lockfile"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-pnpm-smoke",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/node_modules/.bin:$PATH\"; pnpm --version"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/node_modules/.bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-2",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/node_modules/.bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "corepack-enable-help",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack enable --help"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "corepack-enable-local",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack enable pnpm --install-directory e:\\MoonTV-main\\.corepack-bin && dir /b e:\\MoonTV-main\\.corepack-bin"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "corepack-local-smoke",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\.corepack-bin;%PATH%\" && pnpm -v && bash -lc \"pnpm --version\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "corepack-local-smoke-2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\.corepack-bin;%PATH%\" && pnpm -v && bash -lc \"pnpm --version\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "bash-corepack-bin-smoke",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; command -v pnpm; pnpm --version; pnpm -v"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-3",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "corepack-local-smoke-3",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"set \"PATH=e:\\MoonTV-main\\.corepack-bin;%PATH%\" && pnpm -v && bash -lc \"pnpm --version\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-4",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-5",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "docker-check",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"docker --version"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "wsl-check",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"wsl --status"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-6",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pnpm-relink-after-vercel",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"corepack pnpm install --force --frozen-lockfile"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-7",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; export ENABLE_EXPERIMENTAL_COREPACK=1; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-8",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; export ENABLE_EXPERIMENTAL_COREPACK=1; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "pages-build-verified-9",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"export PATH=\"/e/MoonTV-main/.corepack-bin:$PATH\"; export ENABLE_EXPERIMENTAL_COREPACK=1; pnpm run pages:build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-status",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git status --short --branch"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-remote",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git remote -v"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-branch",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git branch --show-current"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-add-all",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git add -A"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-user",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git config user.name && git config user.email"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-diff-cached",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git diff --cached --stat"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-status-staged",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git status --short --branch"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-initial-commit",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git add -A && git -c user.name=\"GitHub Copilot\" -c user.email=\"copilot@github.com\" commit -m \"Initial commit\""
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "git-initial-commit-safe",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git config user.name GitHubCopilot && git config user.email copilot@github.com && git add -A && git commit -m initial-commit"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "git-initial-commit-noverify",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git config user.name GitHubCopilot && git config user.email copilot@github.com && git add -A && git commit --no-verify -m initial-commit"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
