@@ -1,1 +1,7 @@
-export default {};
+const config = {
+  default: {
+    // ... config
+  }
+};
+
+export default config;
