@@ -245,6 +245,12 @@ div[data-media-provider] video {
     overflow: hidden;
   }
 
+  .hero-preview {
+    aspect-ratio: 16/9;
+    max-height: 64vh;
+    overflow: hidden;
+  }
+
   .rating-badge {
     background: #f0b90b;
     color: #000;

@@ -435,13 +435,13 @@ function HomeClient() {
             <div className='px-2 sm:px-6 pb-8'>
               {/* 强主视觉 + 右侧榜单 */}
               <div className='grid gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(320px,0.85fr)] items-stretch mb-10'>
-                <section className='relative min-h-[560px] overflow-hidden rounded-[36px] border border-white/8 bg-[#151515] shadow-[0_30px_90px_rgba(0,0,0,0.55)]'>
-                  <div className='absolute inset-0'>
+                <section className='relative aspect-[16/9] md:min-h-[560px] max-h-[64vh] overflow-hidden rounded-[36px] border border-white/8 bg-[#151515] shadow-[0_30px_90px_rgba(0,0,0,0.55)]'>
+                  <div className='absolute inset-0 hero-preview'>
                     {heroPoster ? (
                       <img
                         src={heroPoster}
                         alt={heroTitle}
-                        className='h-full w-full object-cover'
+                        className='h-full w-full object-cover object-center'
                       />
                     ) : (
                       <div className='h-full w-full bg-[radial-gradient(circle_at_top,_rgba(23,47,59,0.75),_transparent_40%),linear-gradient(135deg,_#0f1116,_#181818)]' />
@@ -450,7 +450,7 @@ function HomeClient() {
                     <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent' />
                   </div>
 
-                  <div className='relative z-10 flex h-full min-h-[420px] items-end p-6 sm:p-10'>
+                  <div className='relative z-10 flex h-full items-end p-6 sm:p-10'>
                     <div className='max-w-2xl'>
                       <div className='mb-4 flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.24em] text-neutral-300'>
                         <span className='rounded-full border border-[#f0b90b]/30 bg-[#f0b90b]/10 px-3 py-1 text-[#f0b90b]'>
