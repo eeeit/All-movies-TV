@@ -3,6 +3,7 @@
 'use client';
 
 import {
+  ChevronLeft,
   ChevronRight,
   Clapperboard,
   Flame,
@@ -34,9 +35,7 @@ import {
 } from '@/lib/types';
 
 import CapsuleSwitch from '@/components/CapsuleSwitch';
-import ContinueWatching from '@/components/ContinueWatching';
 import PageLayout from '@/components/PageLayout';
-import ScrollableRow from '@/components/ScrollableRow';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useSite } from '@/components/SiteProvider';
 import VideoCard from '@/components/VideoCard';
@@ -256,11 +255,18 @@ function HomeClient() {
     rank: index + 1,
     group: t('movie'),
   }));
+  const movieGridItems = displayMovies.slice(0, 6);
+  const seriesGridItems = displayTvShows.slice(0, 4);
+  const varietyGridItems = [
+    ...displayTvShows.slice(4, 6),
+    ...displayMovies.slice(6, 8),
+  ].slice(0, 4);
 
-  const spotlightItems = displayTvShows.slice(0, 4).map((item) => ({
-    ...item,
-    group: t('tv'),
-  }));
+  const jumpToSearch = (title: string) => {
+    const targetTitle = title.trim();
+    if (!targetTitle) return;
+    window.location.href = `/search?q=${encodeURIComponent(targetTitle)}`;
+  };
 
   useEffect(() => {
     if (displayTvShows.length === 0) {
@@ -379,9 +385,9 @@ function HomeClient() {
 
   return (
     <PageLayout>
-      <div className='px-2 sm:px-10 py-4 sm:py-8 overflow-visible'>
+      <div className='px-1 sm:px-8 lg:px-10 py-3 sm:py-7 overflow-visible'>
         {/* 顶部 Tab 切换 */}
-        <div className='mb-8 flex justify-center'>
+        <div className='mb-7 sm:mb-8 flex justify-center'>
           <CapsuleSwitch
             options={[
               { label: t('home'), value: 'home' },
@@ -432,109 +438,298 @@ function HomeClient() {
             </section>
           ) : (
             // 首页视图
-            <div className='px-2 sm:px-6 pb-8'>
-              {/* 强主视觉 + 右侧榜单 */}
-              <div className='grid gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(320px,0.85fr)] items-stretch mb-10'>
-                <section className='relative aspect-[16/9] md:min-h-[560px] max-h-[64vh] overflow-hidden rounded-[36px] border border-white/8 bg-[#151515] shadow-[0_30px_90px_rgba(0,0,0,0.55)]'>
-                  <div className='absolute inset-0 hero-preview'>
-                    {heroPoster ? (
-                      <img
-                        src={heroPoster}
-                        alt={heroTitle}
-                        className='h-full w-full object-cover object-center'
-                      />
-                    ) : (
-                      <div className='h-full w-full bg-[radial-gradient(circle_at_top,_rgba(23,47,59,0.75),_transparent_40%),linear-gradient(135deg,_#0f1116,_#181818)]' />
-                    )}
-                    <div className='absolute inset-0 bg-gradient-to-r from-black via-black/55 to-transparent' />
-                    <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent' />
-                  </div>
+            <div className='px-1 sm:px-4 lg:px-5 pb-10'>
+              <div className='grid gap-6 lg:gap-8 xl:gap-10 xl:grid-cols-[minmax(0,1fr)_340px]'>
+                <div className='space-y-7 sm:space-y-8'>
+                  <section className='relative aspect-[16/10] sm:aspect-[21/9] overflow-hidden rounded-[1.4rem] sm:rounded-[1.8rem] border border-white/10 bg-[#141414] shadow-[0_24px_70px_rgba(0,0,0,0.48)]'>
+                    <div className='absolute inset-0'>
+                      {heroPoster ? (
+                        <img
+                          src={heroPoster}
+                          alt={heroTitle}
+                          className='h-full w-full object-cover'
+                        />
+                      ) : (
+                        <div className='h-full w-full bg-[radial-gradient(circle_at_18%_18%,_rgba(212,175,55,0.2),_transparent_42%),linear-gradient(120deg,_#0f0f0f,_#1a1a1a)]' />
+                      )}
+                      <div className='absolute inset-0 bg-gradient-to-r from-transparent via-[#0f0f0f]/55 to-[#0f0f0f]/95' />
+                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent' />
+                    </div>
 
-                  <div className='relative z-10 flex h-full items-end p-6 sm:p-10'>
-                    <div className='max-w-2xl'>
-                      <div className='mb-4 flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.24em] text-neutral-300'>
-                        <span className='rounded-full border border-[#f0b90b]/30 bg-[#f0b90b]/10 px-3 py-1 text-[#f0b90b]'>
-                          MoonTV
-                        </span>
-                        <span className='flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1'>
-                          <Sparkles className='h-3.5 w-3.5 text-[#f0b90b]' />
-                          {t('rebuildPreview')}
-                        </span>
-                      </div>
-                      <h1 className='max-w-2xl text-4xl font-black tracking-tight text-white drop-shadow sm:text-5xl lg:text-6xl'>
-                        {heroTitle}
-                      </h1>
-                      <p className='mt-5 max-w-xl text-base leading-7 text-neutral-300 sm:text-lg'>
-                        {heroSummary}
-                      </p>
-                      <div className='mt-8 flex flex-wrap items-center gap-3'>
-                        <button
-                          className='inline-flex items-center gap-2 rounded-full bg-[#f0b90b] px-6 py-3 text-sm font-semibold text-black shadow-[0_16px_40px_rgba(240,185,11,0.28)] transition-transform hover:-translate-y-0.5'
-                          onClick={() => {
-                            const targetTitle = heroTitle.trim();
-                            if (targetTitle) {
-                              window.location.href = `/search?q=${encodeURIComponent(
-                                targetTitle
-                              )}`;
-                            }
-                          }}
-                        >
-                          <PlayCircle className='h-4 w-4 fill-black' />
-                          {t('watchNow')}
-                        </button>
-                        <button className='inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:border-[#f0b90b]/40 hover:text-[#f0b90b]'>
-                          <Clapperboard className='h-4 w-4' />
-                          {t('details')}
-                        </button>
+                    <button
+                      type='button'
+                      aria-label='Previous slide'
+                      className='absolute left-2.5 sm:left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/25 bg-black/45 p-1.5 sm:p-2.5 text-white/80 transition-colors hover:bg-[#d4af37] hover:text-black'
+                    >
+                      <ChevronLeft className='h-4 w-4 sm:h-5 sm:w-5' />
+                    </button>
+                    <button
+                      type='button'
+                      aria-label='Next slide'
+                      className='absolute right-2.5 sm:right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/25 bg-black/45 p-1.5 sm:p-2.5 text-white/80 transition-colors hover:bg-[#d4af37] hover:text-black'
+                    >
+                      <ChevronRight className='h-4 w-4 sm:h-5 sm:w-5' />
+                    </button>
+
+                    <div className='relative z-10 flex h-full items-center justify-end p-5 sm:p-8 lg:p-10'>
+                      <div className='max-w-[28rem] text-right'>
+                        <h1 className='text-[1.55rem] font-black leading-tight tracking-tight text-white drop-shadow sm:text-[2.35rem] lg:text-[2.65rem]'>
+                          {heroTitle}
+                        </h1>
+                        <p className='mt-3 text-[13px] leading-6 text-neutral-300 sm:text-[15px] sm:leading-7'>
+                          {heroSummary}
+                        </p>
+                        <div className='mt-7 flex justify-end gap-2.5 sm:gap-3'>
+                          <button
+                            className='inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d4af37] to-[#b39028] px-5 py-2.5 text-[13px] font-semibold text-black shadow-[0_14px_32px_rgba(212,175,55,0.3)] transition-transform hover:scale-[1.03] sm:px-7 sm:py-3 sm:text-[15px]'
+                            onClick={() => jumpToSearch(heroTitle)}
+                          >
+                            <PlayCircle className='h-4 w-4 fill-black shrink-0' />
+                            {t('watchNow')}
+                          </button>
+                          <button
+                            className='inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/20 sm:px-7 sm:py-3 sm:text-[15px]'
+                            onClick={() => jumpToSearch(heroTitle)}
+                          >
+                            <Clapperboard className='h-4 w-4 shrink-0' />
+                            {t('details')}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </section>
 
-                <aside className='rounded-[28px] border border-white/8 bg-[#181818]/95 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] sticky top-24 max-h-[72vh] overflow-auto'>
-                  <div className='mb-4 flex items-center justify-between'>
-                    <h2 className='flex items-center gap-2 text-xl font-bold text-white'>
-                      <TrendingUp className='h-5 w-5 text-[#f0b90b]' />
+                    <div className='absolute bottom-3.5 sm:bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-1.5 sm:gap-2'>
+                      {displayMovies.slice(0, 4).map((item, index) => (
+                        <span
+                          key={`${item.title}-${index}`}
+                          className={
+                            index === 0
+                              ? 'h-1.5 w-7 sm:w-8 rounded-full bg-[#d4af37]'
+                              : 'h-1.5 w-1.5 sm:w-2 rounded-full bg-white/40'
+                          }
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  <div className='flex flex-col xl:flex-row gap-7 xl:gap-8'>
+                    <section className='xl:w-7/12'>
+                      <div className='mb-4 sm:mb-5 flex items-center justify-between'>
+                        <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                          <Flame className='h-5 w-5 text-[#d4af37]' />
+                          {t('hotMovies')}
+                        </h2>
+                        <Link
+                          href='/douban?type=movie'
+                          className='flex items-center gap-1 text-xs sm:text-sm text-neutral-400 hover:text-white'
+                        >
+                          {t('more')}
+                          <ChevronRight className='h-4 w-4' />
+                        </Link>
+                      </div>
+
+                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4'>
+                        {loading
+                          ? Array.from({ length: 6 }).map((_, index) => (
+                              <div key={index}>
+                                <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
+                              </div>
+                            ))
+                          : movieGridItems.map((movie) => {
+                              const omdbMovie = omdbMovies[movie.title];
+                              const actualPoster =
+                                omdbMovie?.poster || movie.poster;
+                              const actualRate = omdbMovie?.rate || movie.rate;
+
+                              return (
+                                <button
+                                  key={movie.title}
+                                  className='group text-left space-y-0.5'
+                                  onClick={() => jumpToSearch(movie.title)}
+                                >
+                                  <div className='relative aspect-[2/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
+                                    {actualPoster ? (
+                                      <img
+                                        src={actualPoster}
+                                        alt={movie.title}
+                                        className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                                      />
+                                    ) : null}
+                                    <span className='absolute right-2 top-2 rounded bg-black/75 px-2 py-1 text-[11px] leading-none font-bold text-[#d4af37]'>
+                                      {actualRate || '—'}
+                                    </span>
+                                    <div className='absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100'>
+                                      <span className='rounded-full bg-[#d4af37] p-2.5 text-black shadow-[0_10px_24px_rgba(0,0,0,0.4)]'>
+                                        <PlayCircle className='h-5 w-5 fill-black' />
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
+                                    {movie.title}
+                                  </h3>
+                                  <p className='mt-1 text-[11px] sm:text-xs text-neutral-400'>
+                                    {movie.year || '—'}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                      </div>
+                    </section>
+
+                    <div className='flex flex-1 flex-col gap-7 xl:w-5/12'>
+                      <section>
+                        <div className='mb-4 sm:mb-5 flex items-center justify-between'>
+                          <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                            <Sparkles className='h-5 w-5 text-[#d4af37]' />
+                            {t('hotSeries')}
+                          </h2>
+                          <Link
+                            href='/douban?type=tv'
+                            className='flex items-center gap-1 text-xs sm:text-sm text-neutral-400 hover:text-white'
+                          >
+                            {t('more')}
+                            <ChevronRight className='h-4 w-4' />
+                          </Link>
+                        </div>
+                        <div className='grid grid-cols-2 gap-3 sm:gap-4'>
+                          {loading
+                            ? Array.from({ length: 4 }).map((_, index) => (
+                                <div key={index}>
+                                  <div className='aspect-[16/10] sm:aspect-[4/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                  <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                </div>
+                              ))
+                            : seriesGridItems.map((show) => {
+                                const tvmazeShow = tvmazeTvShows[show.title];
+                                const omdbShow = omdbTvShows[show.title];
+                                const actualPoster =
+                                  tvmazeShow?.poster ||
+                                  omdbShow?.poster ||
+                                  show.poster;
+
+                                return (
+                                  <button
+                                    key={show.title}
+                                    className='group text-left space-y-0.5'
+                                    onClick={() => jumpToSearch(show.title)}
+                                  >
+                                    <div className='relative aspect-[16/10] sm:aspect-[4/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
+                                      {actualPoster ? (
+                                        <img
+                                          src={actualPoster}
+                                          alt={show.title}
+                                          className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                                        />
+                                      ) : null}
+                                      <span className='absolute bottom-2 right-2 rounded bg-black/75 px-2 py-1 text-[10px] sm:text-[11px] leading-none text-white'>
+                                        {t('updating')}
+                                      </span>
+                                    </div>
+                                    <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
+                                      {show.title}
+                                    </h3>
+                                  </button>
+                                );
+                              })}
+                        </div>
+                      </section>
+
+                      <section>
+                        <div className='mb-4 sm:mb-5 flex items-center justify-between'>
+                          <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                            <Sparkles className='h-5 w-5 text-[#d4af37]' />
+                            {t('variety')}
+                          </h2>
+                        </div>
+                        <div className='grid grid-cols-2 gap-3 sm:gap-4'>
+                          {loading
+                            ? Array.from({ length: 4 }).map((_, index) => (
+                                <div key={index}>
+                                  <div className='aspect-[16/10] sm:aspect-video rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                  <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                </div>
+                              ))
+                            : varietyGridItems.map((item) => {
+                                const tvmazeShow = tvmazeTvShows[item.title];
+                                const omdbItem =
+                                  omdbTvShows[item.title] ||
+                                  omdbMovies[item.title];
+                                const actualPoster =
+                                  tvmazeShow?.poster ||
+                                  omdbItem?.poster ||
+                                  item.poster;
+
+                                return (
+                                  <button
+                                    key={item.title}
+                                    className='group text-left space-y-0.5'
+                                    onClick={() => jumpToSearch(item.title)}
+                                  >
+                                    <div className='relative aspect-[16/10] sm:aspect-video overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
+                                      {actualPoster ? (
+                                        <img
+                                          src={actualPoster}
+                                          alt={item.title}
+                                          className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                                        />
+                                      ) : null}
+                                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent' />
+                                    </div>
+                                    <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
+                                      {item.title}
+                                    </h3>
+                                  </button>
+                                );
+                              })}
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+
+                <aside className='rounded-[1.4rem] sm:rounded-[1.6rem] border border-white/10 bg-[#1a1a1a]/95 p-4 sm:p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] xl:sticky xl:top-28 xl:max-h-[calc(100vh-130px)] xl:overflow-auto'>
+                  <div className='mb-4 sm:mb-5 flex items-center justify-between'>
+                    <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                      <TrendingUp className='h-5 w-5 text-[#d4af37]' />
                       {t('ranking')}
                     </h2>
                     <Link
                       href='/douban?type=movie'
-                      className='flex items-center gap-1 text-sm text-neutral-400 hover:text-[#f0b90b]'
+                      className='flex items-center gap-1 text-xs sm:text-sm text-neutral-400 hover:text-white'
                     >
                       {t('more')}
                       <ChevronRight className='h-4 w-4' />
                     </Link>
                   </div>
 
-                  <div className='space-y-4'>
+                  <div className='space-y-2.5 sm:space-y-3'>
                     {loading
                       ? Array.from({ length: 9 }).map((_, index) => (
                           <div
                             key={index}
-                            className='flex items-center gap-4 rounded-2xl border border-white/5 bg-white/3 p-3'
+                            className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'
                           >
-                            <div className='h-10 w-8 rounded-lg bg-white/8 animate-pulse' />
-                            <div className='h-10 flex-1 rounded-lg bg-white/8 animate-pulse' />
+                            <div className='h-9 w-7 sm:h-10 sm:w-8 rounded-lg bg-white/10 animate-pulse' />
+                            <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
                           </div>
                         ))
                       : rankingItems.map((item) => {
                           const omdbMovie = omdbMovies[item.title];
                           const actualPoster = omdbMovie?.poster || item.poster;
                           const actualRate = omdbMovie?.rate || item.rate;
+
                           return (
                             <button
                               key={`${item.title}-${item.rank}`}
-                              className='flex w-full items-center gap-4 rounded-2xl border border-white/5 bg-white/[0.03] p-3 text-left transition-colors hover:border-[#f0b90b]/25 hover:bg-white/[0.06]'
-                              onClick={() => {
-                                window.location.href = `/search?q=${encodeURIComponent(
-                                  item.title
-                                )}`;
-                              }}
+                              className='flex w-full items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/[0.03] p-2.5 sm:p-3 text-left transition-colors hover:border-[#d4af37]/35 hover:bg-white/[0.08]'
+                              onClick={() => jumpToSearch(item.title)}
                             >
-                              <div className='flex h-10 w-8 items-center justify-center text-lg font-black text-[#f0b90b]'>
-                                {item.rank === 1 ? '👑' : item.rank}
+                              <div className='flex h-9 w-7 sm:h-10 sm:w-8 items-center justify-center text-base sm:text-lg font-black text-[#d4af37]'>
+                                {item.rank === 1 ? '1' : item.rank}
                               </div>
-                              <div className='h-12 w-8 overflow-hidden rounded-md bg-neutral-800'>
+                              <div className='h-11 w-8 sm:h-12 sm:w-9 overflow-hidden rounded-md bg-[#242424]'>
                                 {actualPoster ? (
                                   <img
                                     src={actualPoster}
@@ -544,237 +739,20 @@ function HomeClient() {
                                 ) : null}
                               </div>
                               <div className='min-w-0 flex-1'>
-                                <div className='truncate text-sm font-semibold text-neutral-100'>
+                                <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
                                   {item.title}
-                                </div>
-                                <div className='mt-1 truncate text-xs text-neutral-400'>
+                                </p>
+                                <p className='mt-0.5 truncate text-[11px] sm:text-xs text-neutral-400'>
                                   {item.group}
-                                </div>
+                                </p>
                               </div>
-                              <div className='text-sm font-bold text-[#f0b90b]'>
+                              <p className='text-[13px] sm:text-sm font-bold text-[#d4af37]'>
                                 {actualRate || '—'}
-                              </div>
+                              </p>
                             </button>
                           );
                         })}
                   </div>
-                </aside>
-              </div>
-
-              <div className='grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]'>
-                <section className='space-y-8'>
-                  <ContinueWatching />
-
-                  <section>
-                    <div className='mb-4 flex items-center justify-between'>
-                      <h2 className='flex items-center gap-2 text-2xl font-bold text-white'>
-                        <Flame className='h-5 w-5 text-[#f0b90b]' />
-                        {t('hotMovies')}
-                      </h2>
-                      <Link
-                        href='/douban?type=movie'
-                        className='flex items-center text-sm text-neutral-400 hover:text-[#f0b90b]'
-                      >
-                        {t('more')}
-                        <ChevronRight className='w-4 h-4 ml-1' />
-                      </Link>
-                    </div>
-                    <ScrollableRow>
-                      {loading
-                        ? Array.from({ length: 8 }).map((_, index) => (
-                            <div
-                              key={index}
-                              className='min-w-[160px] w-40 sm:min-w-[180px] sm:w-44'
-                            >
-                              <div className='relative aspect-[2/3] w-full overflow-hidden rounded-2xl bg-white/8 animate-pulse' />
-                              <div className='mt-3 h-4 rounded bg-white/8 animate-pulse' />
-                              <div className='mt-2 h-3 rounded bg-white/8 animate-pulse w-2/3' />
-                            </div>
-                          ))
-                        : displayMovies.map((movie, index) => {
-                            const omdbMovie = omdbMovies[movie.title];
-                            const actualPoster =
-                              omdbMovie?.poster || movie.poster;
-                            const actualRate = omdbMovie?.rate || movie.rate;
-                            const actualYear = omdbMovie?.year || movie.year;
-                            const source =
-                              tmdbMovies.length > 0
-                                ? 'tmdb'
-                                : traktMovies.length > 0
-                                ? 'trakt'
-                                : 'douban';
-
-                            return (
-                              <div
-                                key={index}
-                                className='min-w-[160px] w-40 sm:min-w-[180px] sm:w-44'
-                              >
-                                <VideoCard
-                                  from={source}
-                                  title={movie.title}
-                                  poster={actualPoster}
-                                  douban_id={
-                                    source === 'douban' ? movie.id : undefined
-                                  }
-                                  rate={actualRate}
-                                  year={actualYear}
-                                  type='movie'
-                                />
-                              </div>
-                            );
-                          })}
-                    </ScrollableRow>
-                  </section>
-
-                  <section>
-                    <div className='mb-4 flex items-center justify-between'>
-                      <h2 className='flex items-center gap-2 text-2xl font-bold text-white'>
-                        <Sparkles className='h-5 w-5 text-[#f0b90b]' />
-                        {t('hotSeries')}
-                      </h2>
-                      <Link
-                        href='/douban?type=tv'
-                        className='flex items-center text-sm text-neutral-400 hover:text-[#f0b90b]'
-                      >
-                        {t('more')}
-                        <ChevronRight className='w-4 h-4 ml-1' />
-                      </Link>
-                    </div>
-                    <ScrollableRow>
-                      {loading
-                        ? Array.from({ length: 8 }).map((_, index) => (
-                            <div
-                              key={index}
-                              className='min-w-[160px] w-40 sm:min-w-[180px] sm:w-44'
-                            >
-                              <div className='relative aspect-[2/3] w-full overflow-hidden rounded-2xl bg-white/8 animate-pulse' />
-                              <div className='mt-3 h-4 rounded bg-white/8 animate-pulse' />
-                              <div className='mt-2 h-3 rounded bg-white/8 animate-pulse w-2/3' />
-                            </div>
-                          ))
-                        : displayTvShows.map((show, index) => {
-                            const tvmazeShow = tvmazeTvShows[show.title];
-                            const omdbShow = omdbTvShows[show.title];
-                            const actualPoster =
-                              tvmazeShow?.poster ||
-                              omdbShow?.poster ||
-                              show.poster;
-                            const actualRate =
-                              tvmazeShow?.rate || omdbShow?.rate || show.rate;
-                            const actualYear =
-                              tvmazeShow?.year || omdbShow?.year || show.year;
-                            const source =
-                              tmdbTvShows.length > 0
-                                ? 'tmdb'
-                                : traktTvShows.length > 0
-                                ? 'trakt'
-                                : 'douban';
-
-                            return (
-                              <div
-                                key={index}
-                                className='min-w-[160px] w-40 sm:min-w-[180px] sm:w-44'
-                              >
-                                <VideoCard
-                                  from={source}
-                                  title={show.title}
-                                  poster={actualPoster}
-                                  douban_id={
-                                    source === 'douban' ? show.id : undefined
-                                  }
-                                  rate={actualRate}
-                                  year={actualYear}
-                                />
-                              </div>
-                            );
-                          })}
-                    </ScrollableRow>
-                  </section>
-                </section>
-
-                <aside className='space-y-6'>
-                  <section className='rounded-[28px] border border-white/8 bg-[#181818]/95 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)]'>
-                    <div className='mb-4 flex items-center justify-between'>
-                      <h3 className='text-xl font-bold text-white'>
-                        {t('editorPicks')}
-                      </h3>
-                      <span className='text-sm text-neutral-400'>
-                        {t('recommend')}
-                      </span>
-                    </div>
-                    <div className='space-y-3'>
-                      {spotlightItems.map((item) => {
-                        const omdbShow = omdbTvShows[item.title];
-                        const actualPoster =
-                          item.poster || omdbShow?.poster || '';
-                        return (
-                          <button
-                            key={item.title}
-                            className='flex w-full items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3 text-left transition-colors hover:border-[#f0b90b]/25 hover:bg-white/[0.06]'
-                            onClick={() => {
-                              window.location.href = `/search?q=${encodeURIComponent(
-                                item.title
-                              )}`;
-                            }}
-                          >
-                            <div className='h-16 w-24 overflow-hidden rounded-xl bg-neutral-800'>
-                              {actualPoster ? (
-                                <img
-                                  src={actualPoster}
-                                  alt={item.title}
-                                  className='h-full w-full object-cover'
-                                />
-                              ) : null}
-                            </div>
-                            <div className='min-w-0 flex-1'>
-                              <div className='truncate font-semibold text-neutral-100'>
-                                {item.title}
-                              </div>
-                              <div className='mt-1 line-clamp-2 text-xs text-neutral-400'>
-                                {item.rate || item.year || t('featured')}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </section>
-
-                  <section className='rounded-[28px] border border-white/8 bg-[#181818]/95 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)]'>
-                    <div className='mb-4 flex items-center justify-between'>
-                      <h3 className='text-xl font-bold text-white'>
-                        {t('weeklyUpdate')}
-                      </h3>
-                      <span className='text-sm text-neutral-400'>
-                        {t('updating')}
-                      </span>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      {displayMovies.slice(0, 4).map((item) => (
-                        <button
-                          key={item.title}
-                          className='group relative aspect-[16/9] overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] text-left'
-                          onClick={() => {
-                            window.location.href = `/search?q=${encodeURIComponent(
-                              item.title
-                            )}`;
-                          }}
-                        >
-                          <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
-                          <div className='absolute inset-0 flex items-end p-3'>
-                            <div>
-                              <div className='text-sm font-semibold text-white'>
-                                {item.title}
-                              </div>
-                              <div className='text-xs text-[#f0b90b]'>
-                                {item.rate || item.year}
-                              </div>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </section>
                 </aside>
               </div>
             </div>

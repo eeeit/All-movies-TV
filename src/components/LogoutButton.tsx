@@ -29,7 +29,7 @@ export const LogoutButton: React.FC = () => {
   return (
     <button
       onClick={handleLogout}
-      className='w-10 h-10 p-2 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200/50 dark:text-gray-300 dark:hover:bg-gray-700/50 transition-colors'
+      className='flex h-10 w-10 items-center justify-center rounded-full p-2 text-neutral-300 transition-colors hover:bg-white/10 hover:text-[#d4af37]'
       aria-label='Logout'
     >
       <LogOut className='w-full h-full' />

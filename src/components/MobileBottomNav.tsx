@@ -56,7 +56,7 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
 
   return (
     <nav
-      className='md:hidden fixed left-0 right-0 z-[600] bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 overflow-hidden shadow-[0_-16px_50px_rgba(0,0,0,0.35)]'
+      className='md:hidden fixed left-0 right-0 z-[600] bg-[#0f0f0f]/95 backdrop-blur-xl border-t border-white/10 overflow-hidden shadow-[0_-16px_50px_rgba(0,0,0,0.35)]'
       style={{
         /* 紧贴视口底部，同时在内部留出安全区高度 */
         bottom: 0,
@@ -74,11 +74,11 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
               >
                 <item.icon
                   className={`h-6 w-6 ${
-                    active ? 'text-[#f0b90b]' : 'text-neutral-500'
+                    active ? 'text-[#d4af37]' : 'text-neutral-500'
                   }`}
                 />
                 <span
-                  className={active ? 'text-[#f0b90b]' : 'text-neutral-400'}
+                  className={active ? 'text-[#d4af37]' : 'text-neutral-400'}
                 >
                   {item.label}
                 </span>

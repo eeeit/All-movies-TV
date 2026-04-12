@@ -1,13 +1,13 @@
+import Link from 'next/link';
+import { Play, Search } from 'lucide-react';
+
 import { BackButton } from './BackButton';
-import { LogoutButton } from './LogoutButton';
 import { LanguageToggle } from './LanguageToggle';
+import { LogoutButton } from './LogoutButton';
 import MobileBottomNav from './MobileBottomNav';
 import MobileHeader from './MobileHeader';
 import { SettingsButton } from './SettingsButton';
-import Sidebar from './Sidebar';
 import { ThemeToggle } from './ThemeToggle';
-import Link from 'next/link';
-import { Search } from 'lucide-react';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -15,76 +15,106 @@ interface PageLayoutProps {
 }
 
 const PageLayout = ({ children, activePath = '/' }: PageLayoutProps) => {
+  const navItems = [
+    { href: '/', label: '首页' },
+    { href: '/search', label: '搜索' },
+    { href: '/douban?type=movie', label: '电影' },
+    { href: '/douban?type=tv', label: '剧集' },
+    { href: '/douban?type=show', label: '综艺' },
+  ];
+
+  const isNavActive = (href: string) => {
+    if (href === '/') return activePath === '/';
+    if (href.startsWith('/douban')) {
+      const match = href.match(/type=([^&]+)/);
+      const type = match?.[1];
+      return (
+        activePath.startsWith('/douban') &&
+        Boolean(type && activePath.includes(`type=${type}`))
+      );
+    }
+
+    return activePath.startsWith(href);
+  };
+
   return (
-    <div className='w-full min-h-screen bg-[#121212] text-neutral-100'>
+    <div className='w-full min-h-screen bg-[#0f0f0f] text-neutral-100'>
       {/* 移动端头部 */}
       <MobileHeader showBackButton={['/play'].includes(activePath)} />
 
-      {/* 桌面端顶部导航（参考 UI 设计） */}
-      <div className='hidden md:flex items-center justify-between px-6 py-3 border-b border-white/5 top-desktop-header z-20'>
-        <div className='flex items-center gap-4'>
-          <Link href='/' className='text-2xl font-bold text-[#f0b90b]'>
-            MoonTV
-          </Link>
-        </div>
+      {/* 桌面端顶部导航 */}
+      <header className='hidden md:block sticky top-0 z-40 border-b border-white/10 bg-[#0f0f0f]/90 backdrop-blur-md'>
+        <div className='mx-auto max-w-[1600px] px-4 lg:px-6'>
+          <div className='flex h-[4.25rem] items-center justify-between gap-5 lg:gap-6'>
+            <Link
+              href='/'
+              className='flex items-center gap-2 text-white transition-colors hover:text-[#d4af37]'
+            >
+              <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#d4af37] to-[#b39028] text-black'>
+                <Play className='h-4 w-4 fill-black' />
+              </span>
+              <span className='text-[22px] font-bold tracking-[0.06em]'>
+                MoonTV
+              </span>
+            </Link>
 
-        <div className='flex-1 flex justify-center'>
-          <div className='w-full max-w-2xl'>
-            <div className='relative'>
+            <form
+              action='/search'
+              className='relative w-full max-w-[34rem] flex-1'
+            >
               <input
                 aria-label='搜索'
-                placeholder='搜索影视、演员、导演...'
-                className='w-full rounded-full bg-[#0f0f0f]/60 border border-white/6 px-4 py-2 text-sm placeholder:text-neutral-400 focus:outline-none'
+                type='search'
+                name='q'
+                placeholder='搜索影视...'
+                className='w-full rounded-full border border-white/12 bg-[#1a1a1a] py-2.5 pl-4 pr-12 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-[#d4af37] focus:outline-none'
               />
-              <button className='absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[#f0b90b] text-black'>
+              <button
+                type='submit'
+                className='absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-[#d4af37] p-2 text-black transition-colors hover:bg-[#c19a2f]'
+              >
                 <Search className='h-4 w-4' />
               </button>
+            </form>
+
+            <div className='flex items-center gap-1.5'>
+              <LanguageToggle />
+              <ThemeToggle />
+              <SettingsButton />
+              <LogoutButton />
             </div>
           </div>
+
+          <nav className='flex h-12 items-center gap-1.5'>
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                data-active={isNavActive(item.href)}
+                className='rounded-full border border-transparent px-3.5 py-1.5 text-[13px] lg:text-sm text-neutral-400 transition-colors hover:text-neutral-100 data-[active=true]:border-[#d4af37]/45 data-[active=true]:bg-[#d4af37]/10 data-[active=true]:text-[#d4af37]'
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
+      </header>
 
-        <div className='flex items-center gap-2'>
-          <LanguageToggle />
-          <ThemeToggle />
-          <SettingsButton />
-          <LogoutButton />
-        </div>
-      </div>
-
-      {/* 主要布局容器 */}
-      <div className='flex md:grid md:grid-cols-[auto_1fr] w-full min-h-screen md:min-h-auto'>
-        {/* 侧边栏 - 桌面端显示，移动端隐藏 */}
-        <div className='hidden md:block'>
-          <Sidebar activePath={activePath} />
-        </div>
-
-        {/* 主内容区域 */}
-        <div className='relative min-w-0 flex-1 transition-all duration-300'>
-          {/* 桌面端左上角返回按钮 */}
-          {['/play'].includes(activePath) && (
-            <div className='absolute top-3 left-1 z-20 hidden md:flex'>
-              <BackButton />
-            </div>
-          )}
-
-          {/* 桌面端顶部按钮 */}
-          <div className='absolute top-2 right-4 z-20 hidden md:flex items-center gap-2'>
-            <SettingsButton />
-            <LogoutButton />
-            <LanguageToggle />
-            <ThemeToggle />
+      <div className='relative w-full'>
+        {['/play'].includes(activePath) && (
+          <div className='absolute left-4 top-20 z-20 hidden md:flex'>
+            <BackButton />
           </div>
+        )}
 
-          {/* 主内容 */}
-          <main
-            className='flex-1 md:min-h-0 mb-14 md:mb-0'
-            style={{
-              paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))',
-            }}
-          >
-            <div className='content-container'>{children}</div>
-          </main>
-        </div>
+        <main
+          className='mb-14 md:mb-0'
+          style={{
+            paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))',
+          }}
+        >
+          <div className='content-container'>{children}</div>
+        </main>
       </div>
 
       {/* 移动端底部导航 */}
