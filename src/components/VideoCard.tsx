@@ -390,7 +390,7 @@ export default function VideoCard({
 
       {/* 进度条 */}
       {config.showProgress && progress !== undefined && (
-        <div className='mt-1 h-1 w-full bg-gray-200 rounded-full overflow-hidden'>
+        <div className='mt-1 h-1 w-full bg-white/10 rounded-full overflow-hidden'>
           <div
             className='h-full bg-[#f0b90b] transition-all duration-500 ease-out'
             style={{ width: `${progress}%` }}

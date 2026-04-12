@@ -1,10 +1,10 @@
-# MoonTV
+# 天下影视
 
 <div align="center">
   <img src="public/logo.png" alt="LibreTV Logo" width="120">
 </div>
 
-> 🎬 **MoonTV** 是一个开箱即用的、跨平台的影视聚合播放器。它基于 **Next.js 14** + **Tailwind&nbsp;CSS** + **TypeScript** 构建，支持多资源搜索、在线播放、收藏同步、播放记录、本地/云端存储，让你可以随时随地畅享海量免费影视内容。
+> 🎬 **天下影视** 是一个开箱即用的、跨平台的影视聚合播放器。它基于 **Next.js 14** + **Tailwind&nbsp;CSS** + **TypeScript** 构建，支持多资源搜索、在线播放、收藏同步、播放记录、本地/云端存储，让你可以随时随地畅享海量免费影视内容。
 
 <div align="center">
 
@@ -209,7 +209,7 @@ networks:
 | --------------------------- | ----------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | USERNAME                    | redis 部署时的管理员账号                                    | 任意字符串                       | （空）                                                                                                                     |
 | PASSWORD                    | 默认部署时为唯一访问密码，redis 部署时为管理员密码          | 任意字符串                       | （空）                                                                                                                     |
-| SITE_NAME                   | 站点名称                                                    | 任意字符串                       | MoonTV                                                                                                                     |
+| SITE_NAME                   | 站点名称                                                    | 任意字符串                       | 天下影视                                                                                                                   |
 | ANNOUNCEMENT                | 站点公告                                                    | 任意字符串                       | 本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。 |
 | NEXT_PUBLIC_STORAGE_TYPE    | 播放记录/收藏的存储方式                                     | localstorage、redis、d1、upstash | localstorage                                                                                                               |
 | REDIS_URL                   | redis 连接 url，若 NEXT_PUBLIC_STORAGE_TYPE 为 redis 则必填 | 连接 url                         | 空                                                                                                                         |
@@ -244,7 +244,7 @@ networks:
   - `name`：在人机界面中展示的名称。
   - `detail`：（可选）部分无法通过 API 获取剧集详情的站点，需要提供网页详情根 URL，用于爬取。
 
-MoonTV 支持标准的苹果 CMS V10 API 格式。
+天下影视 支持标准的苹果 CMS V10 API 格式。
 
 修改后 **无需重新构建**，服务会在启动时读取一次。
 
@@ -295,7 +295,7 @@ MoonTV 支持标准的苹果 CMS V10 API 格式。
 
 ## License
 
-[MIT](LICENSE) © 2025 MoonTV & Contributors
+[MIT](LICENSE) © 2025 天下影视 & Contributors
 
 ## 致谢
 

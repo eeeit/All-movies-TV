@@ -54,7 +54,7 @@ const PageLayout = ({ children, activePath = '/' }: PageLayoutProps) => {
                 <Play className='h-4 w-4 fill-black' />
               </span>
               <span className='text-[22px] font-bold tracking-[0.06em]'>
-                MoonTV
+                天下影视
               </span>
             </Link>
 

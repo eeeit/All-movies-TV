@@ -108,7 +108,7 @@ function DoubanPageClient() {
         pageStart,
       };
     },
-    [type, primarySelection, secondarySelection],
+    [type, primarySelection, secondarySelection]
   );
 
   // 防抖的数据加载函数
@@ -174,7 +174,7 @@ function DoubanPageClient() {
           setIsLoadingMore(true);
 
           const data = await getDoubanCategories(
-            getRequestParams(currentPage * 25),
+            getRequestParams(currentPage * 25)
           );
 
           if (data.code === 200) {
@@ -212,7 +212,7 @@ function DoubanPageClient() {
           setCurrentPage((prev) => prev + 1);
         }
       },
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     );
 
     observer.observe(loadingRef.current);
@@ -234,7 +234,7 @@ function DoubanPageClient() {
         setPrimarySelection(value);
       }
     },
-    [primarySelection],
+    [primarySelection]
   );
 
   const handleSecondaryChange = useCallback(
@@ -245,7 +245,7 @@ function DoubanPageClient() {
         setSecondarySelection(value);
       }
     },
-    [secondarySelection],
+    [secondarySelection]
   );
 
   const getPageTitle = () => {
@@ -253,8 +253,8 @@ function DoubanPageClient() {
     return type === 'movie'
       ? t('movie')
       : type === 'tv'
-        ? t('tv')
-        : t('variety');
+      ? t('tv')
+      : t('variety');
   };
 
   const getActivePath = () => {
@@ -273,16 +273,16 @@ function DoubanPageClient() {
         <div className='mb-6 sm:mb-8 space-y-4 sm:space-y-6'>
           {/* 页面标题 */}
           <div>
-            <h1 className='text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2 dark:text-gray-200'>
+            <h1 className='text-2xl sm:text-3xl font-bold text-neutral-100 mb-1 sm:mb-2'>
               {getPageTitle()}
             </h1>
-            <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400'>
+            <p className='text-sm sm:text-base text-neutral-400'>
               {t('featuredContent')}
             </p>
           </div>
 
           {/* 选择器组件 */}
-          <div className='bg-white/60 dark:bg-gray-800/40 rounded-2xl p-4 sm:p-6 border border-gray-200/30 dark:border-gray-700/30 backdrop-blur-sm'>
+          <div className='bg-[#1a1a1a]/90 rounded-2xl p-4 sm:p-6 border border-white/10 backdrop-blur-sm shadow-[0_16px_44px_rgba(0,0,0,0.28)]'>
             <DoubanSelector
               type={type as 'movie' | 'tv' | 'show'}
               primarySelection={primarySelection}

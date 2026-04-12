@@ -45,7 +45,7 @@ function PlayPageClient() {
     'searching' | 'preferring' | 'fetching' | 'ready'
   >('searching');
   const [loadingMessage, setLoadingMessage] = useState(
-    t('searchingPlaybackSource'),
+    t('searchingPlaybackSource')
   );
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
@@ -72,7 +72,7 @@ function PlayPageClient() {
   const [videoCover, setVideoCover] = useState('');
   // 当前源和ID
   const [currentSource, setCurrentSource] = useState(
-    searchParams.get('source') || '',
+    searchParams.get('source') || ''
   );
   const [currentId, setCurrentId] = useState(searchParams.get('id') || '');
 
@@ -82,7 +82,7 @@ function PlayPageClient() {
 
   // 是否需要优选
   const [needPrefer, setNeedPrefer] = useState(
-    searchParams.get('prefer') === 'true',
+    searchParams.get('prefer') === 'true'
   );
   const needPreferRef = useRef(needPrefer);
   useEffect(() => {
@@ -130,7 +130,7 @@ function PlayPageClient() {
   const [availableSources, setAvailableSources] = useState<SearchResult[]>([]);
   const [sourceSearchLoading, setSourceSearchLoading] = useState(false);
   const [sourceSearchError, setSourceSearchError] = useState<string | null>(
-    null,
+    null
   );
 
   // 优选和测速开关
@@ -176,7 +176,7 @@ function PlayPageClient() {
 
   // 播放源优选函数
   const preferBestSource = async (
-    sources: SearchResult[],
+    sources: SearchResult[]
   ): Promise<SearchResult> => {
     if (sources.length === 1) return sources[0];
 
@@ -211,7 +211,7 @@ function PlayPageClient() {
           } catch (error) {
             return null;
           }
-        }),
+        })
       );
       allResults.push(...batchResults);
     }
@@ -282,7 +282,7 @@ function PlayPageClient() {
         result.testResult,
         maxSpeed,
         minPing,
-        maxPing,
+        maxPing
       ),
     }));
 
@@ -296,7 +296,7 @@ function PlayPageClient() {
           result.source.source_name
         } - 评分: ${result.score.toFixed(2)} (${result.testResult.quality}, ${
           result.testResult.loadSpeed
-        }, ${result.testResult.pingTime}ms)`,
+        }, ${result.testResult.pingTime}ms)`
       );
     });
 
@@ -312,7 +312,7 @@ function PlayPageClient() {
     },
     maxSpeed: number,
     minPing: number,
-    maxPing: number,
+    maxPing: number
   ): number => {
     let score = 0;
 
@@ -376,7 +376,7 @@ function PlayPageClient() {
   // 更新视频地址
   const updateVideoUrl = (
     detailData: SearchResult | null,
-    episodeIndex: number,
+    episodeIndex: number
   ) => {
     if (
       !detailData ||
@@ -446,7 +446,7 @@ function PlayPageClient() {
           callbacks.onSuccess = function (
             response: any,
             stats: any,
-            context: any,
+            context: any
           ) {
             // 如果是m3u8文件，处理内容以移除广告分段
             if (response.data && typeof response.data === 'string') {
@@ -471,11 +471,11 @@ function PlayPageClient() {
   useEffect(() => {
     const fetchSourceDetail = async (
       source: string,
-      id: string,
+      id: string
     ): Promise<SearchResult[]> => {
       try {
         const detailResponse = await fetch(
-          `/api/detail?source=${source}&id=${id}`,
+          `/api/detail?source=${source}&id=${id}`
         );
         if (!detailResponse.ok) {
           throw new Error('获取视频详情失败');
@@ -494,7 +494,7 @@ function PlayPageClient() {
       // 根据搜索词获取全部源信息
       try {
         const response = await fetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}`,
+          `/api/search?q=${encodeURIComponent(query.trim())}`
         );
         if (!response.ok) {
           throw new Error(t('searchFailed'));
@@ -512,13 +512,13 @@ function PlayPageClient() {
             (searchType
               ? (searchType === 'tv' && result.episodes.length > 1) ||
                 (searchType === 'movie' && result.episodes.length === 1)
-              : true),
+              : true)
         );
         setAvailableSources(results);
         return results;
       } catch (err) {
         setSourceSearchError(
-          err instanceof Error ? err.message : t('searchFailed'),
+          err instanceof Error ? err.message : t('searchFailed')
         );
         setAvailableSources([]);
         return [];
@@ -538,7 +538,7 @@ function PlayPageClient() {
       setLoadingMessage(
         currentSource && currentId
           ? `🎬 ${t('fetchingVideoDetail')}`
-          : `🔍 ${t('searchingPlaybackSource')}`,
+          : `🔍 ${t('searchingPlaybackSource')}`
       );
 
       let sourcesInfo = await fetchSourcesData(searchTitle || videoTitle);
@@ -546,8 +546,7 @@ function PlayPageClient() {
         currentSource &&
         currentId &&
         !sourcesInfo.some(
-          (source) =>
-            source.source === currentSource && source.id === currentId,
+          (source) => source.source === currentSource && source.id === currentId
         )
       ) {
         sourcesInfo = await fetchSourceDetail(currentSource, currentId);
@@ -562,8 +561,7 @@ function PlayPageClient() {
       // 指定源和id且无需优选
       if (currentSource && currentId && !needPreferRef.current) {
         const target = sourcesInfo.find(
-          (source) =>
-            source.source === currentSource && source.id === currentId,
+          (source) => source.source === currentSource && source.id === currentId
         );
         if (target) {
           detailData = target;
@@ -654,7 +652,7 @@ function PlayPageClient() {
   const handleSourceChange = async (
     newSource: string,
     newId: string,
-    newTitle: string,
+    newTitle: string
   ) => {
     try {
       // 显示换源加载状态
@@ -670,7 +668,7 @@ function PlayPageClient() {
         try {
           await deletePlayRecord(
             currentSourceRef.current,
-            currentIdRef.current,
+            currentIdRef.current
           );
           console.log('已清除前一个播放记录');
         } catch (err) {
@@ -679,7 +677,7 @@ function PlayPageClient() {
       }
 
       const newDetail = availableSources.find(
-        (source) => source.source === newSource && source.id === newId,
+        (source) => source.source === newSource && source.id === newId
       );
       if (!newDetail) {
         setError('未找到匹配结果');
@@ -823,7 +821,7 @@ function PlayPageClient() {
         artPlayerRef.current.volume =
           Math.round((artPlayerRef.current.volume + 0.1) * 10) / 10;
         artPlayerRef.current.notice.show = `音量: ${Math.round(
-          artPlayerRef.current.volume * 100,
+          artPlayerRef.current.volume * 100
         )}`;
         e.preventDefault();
       }
@@ -835,7 +833,7 @@ function PlayPageClient() {
         artPlayerRef.current.volume =
           Math.round((artPlayerRef.current.volume - 0.1) * 10) / 10;
         artPlayerRef.current.notice.show = `音量: ${Math.round(
-          artPlayerRef.current.volume * 100,
+          artPlayerRef.current.volume * 100
         )}`;
         e.preventDefault();
       }
@@ -967,7 +965,7 @@ function PlayPageClient() {
         const key = generateStorageKey(currentSource, currentId);
         const isFav = !!favorites[key];
         setFavorited(isFav);
-      },
+      }
     );
 
     return unsubscribe;
@@ -1026,7 +1024,7 @@ function PlayPageClient() {
       currentEpisodeIndex < 0
     ) {
       setError(
-        t('invalidEpisodeIndex').replace('{count}', String(totalEpisodes)),
+        t('invalidEpisodeIndex').replace('{count}', String(totalEpisodes))
       );
       return;
     }
@@ -1046,13 +1044,13 @@ function PlayPageClient() {
     if (!isWebkit && artPlayerRef.current) {
       artPlayerRef.current.switch = videoUrl;
       artPlayerRef.current.title = `${videoTitle} - ${t(
-        'currentEpisodeLabel',
+        'currentEpisodeLabel'
       ).replace('{count}', String(currentEpisodeIndex + 1))}`;
       artPlayerRef.current.poster = videoCover;
       if (artPlayerRef.current?.video) {
         ensureVideoSource(
           artPlayerRef.current.video as HTMLVideoElement,
-          videoUrl,
+          videoUrl
         );
       }
       return;
@@ -1287,7 +1285,7 @@ function PlayPageClient() {
       if (artPlayerRef.current?.video) {
         ensureVideoSource(
           artPlayerRef.current.video as HTMLVideoElement,
-          videoUrl,
+          videoUrl
         );
       }
     } catch (err) {
@@ -1345,9 +1343,9 @@ function PlayPageClient() {
                     loadingStage === 'searching' || loadingStage === 'fetching'
                       ? 'bg-[#f0b90b] scale-125'
                       : loadingStage === 'preferring' ||
-                          loadingStage === 'ready'
-                        ? 'bg-[#f0b90b]'
-                        : 'bg-gray-300'
+                        loadingStage === 'ready'
+                      ? 'bg-[#f0b90b]'
+                      : 'bg-white/20'
                   }`}
                 ></div>
                 <div
@@ -1355,21 +1353,21 @@ function PlayPageClient() {
                     loadingStage === 'preferring'
                       ? 'bg-[#f0b90b] scale-125'
                       : loadingStage === 'ready'
-                        ? 'bg-[#f0b90b]'
-                        : 'bg-gray-300'
+                      ? 'bg-[#f0b90b]'
+                      : 'bg-white/20'
                   }`}
                 ></div>
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-500 ${
                     loadingStage === 'ready'
                       ? 'bg-[#f0b90b] scale-125'
-                      : 'bg-gray-300'
+                      : 'bg-white/20'
                   }`}
                 ></div>
               </div>
 
               {/* 进度条 */}
-              <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden'>
+              <div className='w-full bg-white/10 rounded-full h-2 overflow-hidden'>
                 <div
                   className='h-full bg-gradient-to-r from-[#f0b90b] to-[#d9a90a] rounded-full transition-all duration-1000 ease-out'
                   style={{
@@ -1378,8 +1376,8 @@ function PlayPageClient() {
                       loadingStage === 'fetching'
                         ? '33%'
                         : loadingStage === 'preferring'
-                          ? '66%'
-                          : '100%',
+                        ? '66%'
+                        : '100%',
                   }}
                 ></div>
               </div>
@@ -1426,15 +1424,13 @@ function PlayPageClient() {
 
             {/* 错误信息 */}
             <div className='space-y-4 mb-8'>
-              <h2 className='text-2xl font-bold text-gray-800 dark:text-gray-200'>
+              <h2 className='text-2xl font-bold text-neutral-100'>
                 {t('somethingWentWrong')}
               </h2>
-              <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4'>
-                <p className='text-red-600 dark:text-red-400 font-medium'>
-                  {error}
-                </p>
+              <div className='bg-red-500/10 border border-red-500/35 rounded-lg p-4'>
+                <p className='text-red-300 font-medium'>{error}</p>
               </div>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
+              <p className='text-sm text-neutral-400'>
                 {t('checkConnectionOrRetry')}
               </p>
             </div>
@@ -1472,10 +1468,10 @@ function PlayPageClient() {
       <div className='flex flex-col gap-3 py-4 px-5 lg:px-[3rem] 2xl:px-20'>
         {/* 第一行：影片标题 */}
         <div className='py-1'>
-          <h1 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+          <h1 className='text-xl font-semibold text-neutral-100'>
             {videoTitle || t('featuredContent')}
             {totalEpisodes > 1 && (
-              <span className='text-gray-500 dark:text-gray-400'>
+              <span className='text-neutral-500'>
                 {` > ${t('episode')} ${currentEpisodeIndex + 1}`}
               </span>
             )}
@@ -1640,7 +1636,7 @@ function PlayPageClient() {
                   <span>{detail?.year || videoYear}</span>
                 )}
                 {detail?.source_name && (
-                  <span className='border border-gray-500/60 px-2 py-[1px] rounded'>
+                  <span className='border border-white/20 px-2 py-[1px] rounded'>
                     {detail.source_name}
                   </span>
                 )}
@@ -1661,7 +1657,7 @@ function PlayPageClient() {
           {/* 封面展示 */}
           <div className='hidden md:block md:col-span-1 md:order-first'>
             <div className='pl-0 py-4 pr-6'>
-              <div className='bg-gray-300 dark:bg-gray-700 aspect-[2/3] flex items-center justify-center rounded-xl overflow-hidden'>
+              <div className='bg-white/10 aspect-[2/3] flex items-center justify-center rounded-xl overflow-hidden'>
                 {videoCover ? (
                   <img
                     src={processImageUrl(videoCover)}
@@ -1669,9 +1665,7 @@ function PlayPageClient() {
                     className='w-full h-full object-cover'
                   />
                 ) : (
-                  <span className='text-gray-600 dark:text-gray-400'>
-                    {t('coverImage')}
-                  </span>
+                  <span className='text-neutral-500'>{t('coverImage')}</span>
                 )}
               </div>
             </div>
@@ -1702,9 +1696,7 @@ const FavoriteIcon = ({ filled }: { filled: boolean }) => {
       </svg>
     );
   }
-  return (
-    <Heart className='h-7 w-7 stroke-[1] text-gray-600 dark:text-gray-300' />
-  );
+  return <Heart className='h-7 w-7 stroke-[1] text-neutral-400' />;
 };
 
 export default function PlayPage() {

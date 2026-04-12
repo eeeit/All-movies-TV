@@ -84,7 +84,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
     buttonRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>,
     setIndicatorStyle: React.Dispatch<
       React.SetStateAction<{ left: number; width: number }>
-    >,
+    >
   ) => {
     if (
       activeIndex >= 0 &&
@@ -116,13 +116,13 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
     if (type === 'movie') {
       const activeIndex = moviePrimaryOptions.findIndex(
         (opt) =>
-          opt.value === (primarySelection || moviePrimaryOptions[0].value),
+          opt.value === (primarySelection || moviePrimaryOptions[0].value)
       );
       updateIndicatorPosition(
         activeIndex,
         primaryContainerRef,
         primaryButtonRefs,
-        setPrimaryIndicatorStyle,
+        setPrimaryIndicatorStyle
       );
     }
 
@@ -131,15 +131,15 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
     if (type === 'movie') {
       secondaryActiveIndex = movieSecondaryOptions.findIndex(
         (opt) =>
-          opt.value === (secondarySelection || movieSecondaryOptions[0].value),
+          opt.value === (secondarySelection || movieSecondaryOptions[0].value)
       );
     } else if (type === 'tv') {
       secondaryActiveIndex = tvOptions.findIndex(
-        (opt) => opt.value === (secondarySelection || tvOptions[0].value),
+        (opt) => opt.value === (secondarySelection || tvOptions[0].value)
       );
     } else if (type === 'show') {
       secondaryActiveIndex = showOptions.findIndex(
-        (opt) => opt.value === (secondarySelection || showOptions[0].value),
+        (opt) => opt.value === (secondarySelection || showOptions[0].value)
       );
     }
 
@@ -148,7 +148,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
         secondaryActiveIndex,
         secondaryContainerRef,
         secondaryButtonRefs,
-        setSecondaryIndicatorStyle,
+        setSecondaryIndicatorStyle
       );
     }
   }, [type]); // 只在type变化时重新计算
@@ -157,13 +157,13 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
   useEffect(() => {
     if (type === 'movie') {
       const activeIndex = moviePrimaryOptions.findIndex(
-        (opt) => opt.value === primarySelection,
+        (opt) => opt.value === primarySelection
       );
       const cleanup = updateIndicatorPosition(
         activeIndex,
         primaryContainerRef,
         primaryButtonRefs,
-        setPrimaryIndicatorStyle,
+        setPrimaryIndicatorStyle
       );
       return cleanup;
     }
@@ -176,17 +176,17 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
 
     if (type === 'movie') {
       activeIndex = movieSecondaryOptions.findIndex(
-        (opt) => opt.value === secondarySelection,
+        (opt) => opt.value === secondarySelection
       );
       options = movieSecondaryOptions;
     } else if (type === 'tv') {
       activeIndex = tvOptions.findIndex(
-        (opt) => opt.value === secondarySelection,
+        (opt) => opt.value === secondarySelection
       );
       options = tvOptions;
     } else if (type === 'show') {
       activeIndex = showOptions.findIndex(
-        (opt) => opt.value === secondarySelection,
+        (opt) => opt.value === secondarySelection
       );
       options = showOptions;
     }
@@ -196,7 +196,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
         activeIndex,
         secondaryContainerRef,
         secondaryButtonRefs,
-        setSecondaryIndicatorStyle,
+        setSecondaryIndicatorStyle
       );
       return cleanup;
     }
@@ -207,7 +207,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
     options: SelectorOption[],
     activeValue: string | undefined,
     onChange: (value: string) => void,
-    isPrimary = false,
+    isPrimary = false
   ) => {
     const containerRef = isPrimary
       ? primaryContainerRef
@@ -220,7 +220,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
     return (
       <div
         ref={containerRef}
-        className='relative inline-flex bg-white/8 rounded-full p-0.5 sm:p-1 backdrop-blur-sm border border-white/8'
+        className='relative inline-flex bg-[#141414]/90 rounded-full p-0.5 sm:p-1 backdrop-blur-sm border border-white/12'
       >
         {/* 滑动的白色背景指示器 */}
         {indicatorStyle.width > 0 && (
@@ -263,7 +263,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
         <div className='space-y-3 sm:space-y-4'>
           {/* 一级选择器 */}
           <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
-            <span className='text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 min-w-[48px]'>
+            <span className='text-xs sm:text-sm font-medium text-neutral-400 min-w-[48px]'>
               分类
             </span>
             <div className='overflow-x-auto'>
@@ -271,14 +271,14 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
                 moviePrimaryOptions,
                 primarySelection || moviePrimaryOptions[0].value,
                 onPrimaryChange,
-                true,
+                true
               )}
             </div>
           </div>
 
           {/* 二级选择器 */}
           <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
-            <span className='text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 min-w-[48px]'>
+            <span className='text-xs sm:text-sm font-medium text-neutral-400 min-w-[48px]'>
               地区
             </span>
             <div className='overflow-x-auto'>
@@ -286,7 +286,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
                 movieSecondaryOptions,
                 secondarySelection || movieSecondaryOptions[0].value,
                 onSecondaryChange,
-                false,
+                false
               )}
             </div>
           </div>
@@ -296,7 +296,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
       {/* 电视剧类型 - 只显示一级选择器 */}
       {type === 'tv' && (
         <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
-          <span className='text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 min-w-[48px]'>
+          <span className='text-xs sm:text-sm font-medium text-neutral-400 min-w-[48px]'>
             类型
           </span>
           <div className='overflow-x-auto'>
@@ -304,7 +304,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
               tvOptions,
               secondarySelection || tvOptions[0].value,
               onSecondaryChange,
-              false,
+              false
             )}
           </div>
         </div>
@@ -313,7 +313,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
       {/* 综艺类型 - 只显示一级选择器 */}
       {type === 'show' && (
         <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
-          <span className='text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 min-w-[48px]'>
+          <span className='text-xs sm:text-sm font-medium text-neutral-400 min-w-[48px]'>
             类型
           </span>
           <div className='overflow-x-auto'>
@@ -321,7 +321,7 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
               showOptions,
               secondarySelection || showOptions[0].value,
               onSecondaryChange,
-              false,
+              false
             )}
           </div>
         </div>
