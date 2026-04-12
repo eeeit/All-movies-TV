@@ -123,6 +123,7 @@ function shouldSkipAuth(pathname: string): boolean {
     '/manifest.json',
     '/icons/',
     '/logo.png',
+    '/logo_bg.png',
     '/screenshot.png',
   ];
 
