@@ -24,8 +24,8 @@ import {
 } from '@/lib/db.client';
 import { getDoubanCategories } from '@/lib/douban.client';
 import { getOmdbLookup } from '@/lib/omdb.client';
-import { getTraktTrending } from '@/lib/trakt.client';
 import { getTmdbTrending } from '@/lib/tmdb.client';
+import { getTraktTrending } from '@/lib/trakt.client';
 import { getTvmazeShowSearch } from '@/lib/tvmaze.client';
 import {
   DoubanItem,
@@ -37,8 +37,8 @@ import {
 import { processImageUrl } from '@/lib/utils';
 
 import CapsuleSwitch from '@/components/CapsuleSwitch';
-import PageLayout from '@/components/PageLayout';
 import { useLanguage } from '@/components/LanguageProvider';
+import PageLayout from '@/components/PageLayout';
 import { useSite } from '@/components/SiteProvider';
 import VideoCard from '@/components/VideoCard';
 
@@ -55,6 +55,7 @@ function HomeClient() {
   const [omdbTvShows, setOmdbTvShows] = useState<Record<string, OmdbItem>>({});
   const [hotMovies, setHotMovies] = useState<DoubanItem[]>([]);
   const [hotTvShows, setHotTvShows] = useState<DoubanItem[]>([]);
+  const [hotVarietyShows, setHotVarietyShows] = useState<DoubanItem[]>([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
@@ -97,6 +98,7 @@ function HomeClient() {
         const [
           moviesData,
           tvShowsData,
+          varietyShowsData,
           tmdbMoviesData,
           tmdbTvShowsData,
           traktMoviesData,
@@ -108,6 +110,7 @@ function HomeClient() {
             type: '全部',
           }),
           getDoubanCategories({ kind: 'tv', category: 'tv', type: 'tv' }),
+          getDoubanCategories({ kind: 'tv', category: 'show', type: 'show' }),
           getTmdbTrending({ type: 'movie' }),
           getTmdbTrending({ type: 'tv' }),
           getTraktTrending({ type: 'movie' }),
@@ -126,6 +129,13 @@ function HomeClient() {
           tvShowsData.value.code === 200
         ) {
           setHotTvShows(tvShowsData.value.list);
+        }
+
+        if (
+          varietyShowsData.status === 'fulfilled' &&
+          varietyShowsData.value.code === 200
+        ) {
+          setHotVarietyShows(varietyShowsData.value.list);
         }
 
         if (
@@ -244,10 +254,19 @@ function HomeClient() {
     summary?: string;
   };
 
-  const heroSlides: HeroContent[] = [
+  // 轮播图优先固定走 TMDb，保证图片来源和质量更稳定
+  const tmdbHeroSource = [
+    ...tmdbMovies.filter((item) => item.backdrop || item.poster).slice(0, 6),
+    ...tmdbTvShows.filter((item) => item.backdrop || item.poster).slice(0, 4),
+  ];
+  const fallbackHeroSource = [
     ...displayMovies.slice(0, 6),
     ...displayTvShows.slice(0, 4),
-  ].map((item) => ({
+  ];
+  const heroSourceItems =
+    tmdbHeroSource.length > 0 ? tmdbHeroSource : fallbackHeroSource;
+
+  const heroSlides: HeroContent[] = heroSourceItems.map((item) => ({
     title: item.title,
     poster: item.poster,
     backdrop: (item as any).backdrop,
@@ -269,12 +288,13 @@ function HomeClient() {
   }));
   const movieGridItems = displayMovies.slice(0, 8);
   const seriesGridItems = displayTvShows.slice(0, 8);
-  const varietyGridItems = [
-    ...displayTvShows.slice(8),
-    ...displayMovies.slice(8),
-    ...displayTvShows,
-    ...displayMovies,
-  ].slice(0, 8);
+  const varietySourceItems =
+    hotVarietyShows.length > 0
+      ? hotVarietyShows
+      : hotTvShows.length > 0
+      ? hotTvShows
+      : displayTvShows;
+  const varietyGridItems = varietySourceItems.slice(0, 8);
 
   const jumpToSearch = (title: string) => {
     const targetTitle = title.trim();
