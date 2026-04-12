@@ -54,6 +54,7 @@ function HomeClient() {
   const [omdbTvShows, setOmdbTvShows] = useState<Record<string, OmdbItem>>({});
   const [hotMovies, setHotMovies] = useState<DoubanItem[]>([]);
   const [hotTvShows, setHotTvShows] = useState<DoubanItem[]>([]);
+  const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const { announcement } = useSite();
@@ -234,8 +235,6 @@ function HomeClient() {
       ? traktTvShows
       : hotTvShows;
 
-  const topMovie = displayMovies[0];
-  const topTvShow = displayTvShows[0];
   type HeroContent = {
     title?: string;
     poster?: string;
@@ -244,10 +243,20 @@ function HomeClient() {
     summary?: string;
   };
 
-  const heroItem = (topMovie || topTvShow) as HeroContent | undefined;
+  const heroSlides: HeroContent[] = [
+    ...displayMovies.slice(0, 4),
+    ...displayTvShows.slice(0, 2),
+  ].map((item) => ({
+    title: item.title,
+    poster: item.poster,
+    backdrop: (item as any).backdrop,
+    overview: (item as any).overview,
+    summary: (item as any).summary,
+  }));
+
+  const heroItem = heroSlides[heroIndex];
   const heroTitle = heroItem?.title || announcement || t('featuredContent');
-  const heroPoster =
-    heroItem?.backdrop || heroItem?.poster || topMovie?.poster || '';
+  const heroPoster = heroItem?.backdrop || heroItem?.poster || '';
   const heroSummary =
     heroItem?.overview || heroItem?.summary || t('visualRebuildSummary');
 
@@ -268,6 +277,37 @@ function HomeClient() {
     if (!targetTitle) return;
     window.location.href = `/search?q=${encodeURIComponent(targetTitle)}`;
   };
+
+  const goPrevHero = () => {
+    if (heroSlides.length <= 1) return;
+    setHeroIndex((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
+  };
+
+  const goNextHero = () => {
+    if (heroSlides.length <= 1) return;
+    setHeroIndex((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  useEffect(() => {
+    if (heroSlides.length === 0) {
+      setHeroIndex(0);
+      return;
+    }
+
+    if (heroIndex >= heroSlides.length) {
+      setHeroIndex(0);
+    }
+  }, [heroSlides.length, heroIndex]);
+
+  useEffect(() => {
+    if (activeTab !== 'home' || heroSlides.length <= 1) return;
+
+    const timer = window.setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 6500);
+
+    return () => window.clearInterval(timer);
+  }, [activeTab, heroSlides.length]);
 
   useEffect(() => {
     if (displayTvShows.length === 0) {
@@ -460,6 +500,8 @@ function HomeClient() {
                     <button
                       type='button'
                       aria-label='Previous slide'
+                      onClick={goPrevHero}
+                      disabled={heroSlides.length <= 1}
                       className='absolute left-2.5 sm:left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/25 bg-black/45 p-1.5 sm:p-2.5 text-white/80 transition-colors hover:bg-[#d4af37] hover:text-black'
                     >
                       <ChevronLeft className='h-4 w-4 sm:h-5 sm:w-5' />
@@ -467,6 +509,8 @@ function HomeClient() {
                     <button
                       type='button'
                       aria-label='Next slide'
+                      onClick={goNextHero}
+                      disabled={heroSlides.length <= 1}
                       className='absolute right-2.5 sm:right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/25 bg-black/45 p-1.5 sm:p-2.5 text-white/80 transition-colors hover:bg-[#d4af37] hover:text-black'
                     >
                       <ChevronRight className='h-4 w-4 sm:h-5 sm:w-5' />
@@ -500,11 +544,14 @@ function HomeClient() {
                     </div>
 
                     <div className='absolute bottom-3.5 sm:bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-1.5 sm:gap-2'>
-                      {displayMovies.slice(0, 4).map((item, index) => (
-                        <span
-                          key={`${item.title}-${index}`}
+                      {heroSlides.map((item, index) => (
+                        <button
+                          key={`${item.title || 'hero'}-${index}`}
+                          type='button'
+                          aria-label={`Hero slide ${index + 1}`}
+                          onClick={() => setHeroIndex(index)}
                           className={
-                            index === 0
+                            index === heroIndex
                               ? 'h-1.5 w-7 sm:w-8 rounded-full bg-[#d4af37]'
                               : 'h-1.5 w-1.5 sm:w-2 rounded-full bg-white/40'
                           }
@@ -712,7 +759,7 @@ function HomeClient() {
                             key={index}
                             className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'
                           >
-                            <div className='h-9 w-7 sm:h-10 sm:w-8 rounded-lg bg-white/10 animate-pulse' />
+                            <div className='w-7 sm:w-8 aspect-[2/3] rounded-lg bg-white/10 animate-pulse' />
                             <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
                           </div>
                         ))
@@ -730,7 +777,7 @@ function HomeClient() {
                               <div className='flex h-9 w-7 sm:h-10 sm:w-8 items-center justify-center text-base sm:text-lg font-black text-[#d4af37]'>
                                 {item.rank === 1 ? '1' : item.rank}
                               </div>
-                              <div className='h-11 w-8 sm:h-12 sm:w-9 overflow-hidden rounded-md bg-[#242424]'>
+                              <div className='w-8 sm:w-9 aspect-[2/3] overflow-hidden rounded-md bg-[#242424] shrink-0'>
                                 {actualPoster ? (
                                   <img
                                     src={processImageUrl(actualPoster)}
