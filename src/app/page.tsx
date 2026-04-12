@@ -312,6 +312,39 @@ function HomeClient() {
       rank: index + 1,
       group: t('hotSeries'),
     }));
+
+  const getRankingProviderLabel = (item: DoubanItem | TmdbItem | TraktItem) => {
+    if ('mediaType' in item) return 'TMDb';
+    if ('type' in item) return 'Trakt';
+    return '豆瓣';
+  };
+
+  const getRankingContentType = (
+    item: DoubanItem | TmdbItem | TraktItem,
+    fallbackType?: OmdbItem['type']
+  ) => {
+    if ('mediaType' in item) return item.mediaType;
+    if ('type' in item) return item.type;
+    return fallbackType;
+  };
+
+  const getRankingTypeLabel = (
+    contentType:
+      | TmdbItem['mediaType']
+      | TraktItem['type']
+      | OmdbItem['type']
+      | undefined,
+    fallbackType: 'movie' | 'tv'
+  ) => {
+    const resolvedType =
+      contentType === 'show' ||
+      contentType === 'series' ||
+      contentType === 'episode'
+        ? 'tv'
+        : contentType || fallbackType;
+
+    return resolvedType === 'movie' ? t('movie') : t('tv');
+  };
   const movieGridItems = displayMovies.slice(0, homeSectionItemLimit);
   const seriesGridItems = displayTvShows.slice(0, homeSectionItemLimit);
   const varietySourceItems =
@@ -847,9 +880,9 @@ function HomeClient() {
                     </Link>
                   </div>
 
-                  <div className='space-y-5 sm:space-y-6'>
+                  <div className='space-y-4 sm:space-y-5'>
                     <section>
-                      <p className='mb-3 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                      <p className='mb-2.5 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
                         {t('movie')}
                       </p>
                       <ol className='divide-y divide-white/10'>
@@ -858,7 +891,7 @@ function HomeClient() {
                               (_, index) => (
                                 <li
                                   key={`movie-skeleton-${index}`}
-                                  className='flex items-center gap-3 py-2.5 sm:py-3'
+                                  className='flex items-center gap-3 py-2 sm:py-2.5'
                                 >
                                   <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
                                   <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
@@ -866,8 +899,14 @@ function HomeClient() {
                               )
                             )
                           : rankingItems.map((item) => {
-                              const actualRate =
-                                omdbMovies[item.title]?.rate || item.rate;
+                              const omdbMovie = omdbMovies[item.title];
+                              const actualRate = omdbMovie?.rate || item.rate;
+                              const metaYear = omdbMovie?.year || item.year;
+                              const sourceLabel = getRankingProviderLabel(item);
+                              const typeLabel = getRankingTypeLabel(
+                                getRankingContentType(item, omdbMovie?.type),
+                                'movie'
+                              );
                               const top3CrownClass =
                                 item.rank === 1
                                   ? 'text-[#f0c94d] drop-shadow-[0_0_8px_rgba(240,201,77,0.45)]'
@@ -880,10 +919,10 @@ function HomeClient() {
                               return (
                                 <li key={`${item.title}-${item.rank}`}>
                                   <button
-                                    className='flex w-full items-center gap-3 py-2.5 sm:py-3 text-left transition-colors hover:text-[#d4af37]'
+                                    className='flex w-full items-start gap-3 py-2 sm:py-2.5 text-left transition-colors hover:text-[#d4af37]'
                                     onClick={() => jumpToSearch(item.title)}
                                   >
-                                    <div className='flex h-8 w-8 items-center justify-center shrink-0'>
+                                    <div className='mt-0.5 flex h-7 w-7 items-center justify-center shrink-0'>
                                       {item.rank <= 3 ? (
                                         <Crown
                                           className={`h-5 w-5 ${top3CrownClass}`}
@@ -895,14 +934,18 @@ function HomeClient() {
                                       )}
                                     </div>
                                     <div className='min-w-0 flex-1'>
-                                      <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
+                                      <p className='truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100'>
                                         {item.title}
                                       </p>
-                                      <p className='mt-0.5 truncate text-[11px] sm:text-xs text-neutral-400'>
-                                        {item.group}
-                                      </p>
+                                      <div className='mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] sm:text-[11px] text-neutral-500'>
+                                        {metaYear && <span>{metaYear}</span>}
+                                        <span className='rounded border border-white/15 px-1.5 py-px text-neutral-300'>
+                                          {sourceLabel}
+                                        </span>
+                                        <span>{typeLabel}</span>
+                                      </div>
                                     </div>
-                                    <p className='text-[13px] sm:text-sm font-bold text-[#d4af37]'>
+                                    <p className='pt-0.5 text-[13px] sm:text-sm font-bold text-[#d4af37]'>
                                       {actualRate || '—'}
                                     </p>
                                   </button>
@@ -912,8 +955,8 @@ function HomeClient() {
                       </ol>
                     </section>
 
-                    <section className='border-t border-white/10 pt-4 sm:pt-5'>
-                      <p className='mb-3 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                    <section className='border-t border-white/10 pt-3.5 sm:pt-4'>
+                      <p className='mb-2.5 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
                         {t('hotSeries')}
                       </p>
                       <ol className='divide-y divide-white/10'>
@@ -922,7 +965,7 @@ function HomeClient() {
                               (_, index) => (
                                 <li
                                   key={`series-skeleton-${index}`}
-                                  className='flex items-center gap-3 py-2.5 sm:py-3'
+                                  className='flex items-center gap-3 py-2 sm:py-2.5'
                                 >
                                   <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
                                   <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
@@ -934,6 +977,15 @@ function HomeClient() {
                               const omdbShow = omdbTvShows[item.title];
                               const actualRate =
                                 tvmazeShow?.rate || omdbShow?.rate || item.rate;
+                              const metaYear =
+                                tvmazeShow?.year || omdbShow?.year || item.year;
+                              const sourceLabel = getRankingProviderLabel(item);
+                              const typeLabel = getRankingTypeLabel(
+                                tvmazeShow
+                                  ? 'tv'
+                                  : getRankingContentType(item, omdbShow?.type),
+                                'tv'
+                              );
                               const top3CrownClass =
                                 item.rank === 1
                                   ? 'text-[#f0c94d] drop-shadow-[0_0_8px_rgba(240,201,77,0.45)]'
@@ -946,10 +998,10 @@ function HomeClient() {
                               return (
                                 <li key={`${item.title}-${item.rank}-series`}>
                                   <button
-                                    className='flex w-full items-center gap-3 py-2.5 sm:py-3 text-left transition-colors hover:text-[#d4af37]'
+                                    className='flex w-full items-start gap-3 py-2 sm:py-2.5 text-left transition-colors hover:text-[#d4af37]'
                                     onClick={() => jumpToSearch(item.title)}
                                   >
-                                    <div className='flex h-8 w-8 items-center justify-center shrink-0'>
+                                    <div className='mt-0.5 flex h-7 w-7 items-center justify-center shrink-0'>
                                       {item.rank <= 3 ? (
                                         <Crown
                                           className={`h-5 w-5 ${top3CrownClass}`}
@@ -961,14 +1013,18 @@ function HomeClient() {
                                       )}
                                     </div>
                                     <div className='min-w-0 flex-1'>
-                                      <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
+                                      <p className='truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100'>
                                         {item.title}
                                       </p>
-                                      <p className='mt-0.5 truncate text-[11px] sm:text-xs text-neutral-400'>
-                                        {item.group}
-                                      </p>
+                                      <div className='mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] sm:text-[11px] text-neutral-500'>
+                                        {metaYear && <span>{metaYear}</span>}
+                                        <span className='rounded border border-white/15 px-1.5 py-px text-neutral-300'>
+                                          {sourceLabel}
+                                        </span>
+                                        <span>{typeLabel}</span>
+                                      </div>
                                     </div>
-                                    <p className='text-[13px] sm:text-sm font-bold text-[#d4af37]'>
+                                    <p className='pt-0.5 text-[13px] sm:text-sm font-bold text-[#d4af37]'>
                                       {actualRate || '—'}
                                     </p>
                                   </button>
