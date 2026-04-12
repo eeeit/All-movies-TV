@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Play, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 import { BackButton } from './BackButton';
+import BrandLogo from './BrandLogo';
 import { LanguageToggle } from './LanguageToggle';
 import { LogoutButton } from './LogoutButton';
 import MobileBottomNav from './MobileBottomNav';
@@ -46,17 +47,12 @@ const PageLayout = ({ children, activePath = '/' }: PageLayoutProps) => {
       <header className='hidden md:block sticky top-0 z-40 border-b border-white/10 bg-[#0f0f0f]/90 backdrop-blur-md'>
         <div className='mx-auto max-w-[1600px] px-4 lg:px-6'>
           <div className='flex h-[4.25rem] items-center justify-between gap-5 lg:gap-6'>
-            <Link
-              href='/'
-              className='flex items-center gap-2 text-white transition-colors hover:text-[#d4af37]'
-            >
-              <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#d4af37] to-[#b39028] text-black'>
-                <Play className='h-4 w-4 fill-black' />
-              </span>
-              <span className='text-[22px] font-bold tracking-[0.06em]'>
-                天下影视
-              </span>
-            </Link>
+            <BrandLogo
+              className='w-[180px] lg:w-[220px] shrink-0'
+              imageClassName='rounded-sm'
+              priority
+              sizes='(max-width: 1280px) 180px, 220px'
+            />
 
             <form
               action='/search'

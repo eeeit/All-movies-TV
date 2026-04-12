@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getCacheTime } from '@/lib/config';
 import { TmdbItem, TmdbResult } from '@/lib/types';
+
 interface TmdbTrendingApiResponse {
   results: Array<{
     id: number;
@@ -17,7 +18,17 @@ interface TmdbTrendingApiResponse {
   }>;
 }
 
-const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/w1280';
+
+function buildTmdbImageUrl(
+  imagePath: string,
+  imageType: 'poster' | 'backdrop'
+) {
+  return `${
+    imageType === 'backdrop' ? TMDB_BACKDROP_BASE_URL : TMDB_POSTER_BASE_URL
+  }${imagePath}`;
+}
 
 async function fetchTmdbTrending(type: 'movie' | 'tv') {
   const bearerToken =
@@ -69,7 +80,7 @@ export async function GET(request: Request) {
       id: item.id.toString(),
       title: (item.title || item.name || '').trim(),
       poster: item.poster_path
-        ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
+        ? buildTmdbImageUrl(item.poster_path, 'poster')
         : '',
       rate: item.vote_average ? item.vote_average.toFixed(1) : '',
       year:
@@ -79,7 +90,7 @@ export async function GET(request: Request) {
       mediaType: type,
       overview: item.overview || '',
       backdrop: item.backdrop_path
-        ? `${TMDB_IMAGE_BASE_URL}${item.backdrop_path}`
+        ? buildTmdbImageUrl(item.backdrop_path, 'backdrop')
         : '',
     }));
 

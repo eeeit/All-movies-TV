@@ -12,8 +12,8 @@ import {
   useState,
 } from 'react';
 
+import BrandLogo from './BrandLogo';
 import { useLanguage } from './LanguageProvider';
-import { useSite } from './SiteProvider';
 
 interface SidebarContextType {
   isCollapsed: boolean;
@@ -24,21 +24,6 @@ const SidebarContext = createContext<SidebarContextType>({
 });
 
 export const useSidebar = () => useContext(SidebarContext);
-
-// 可替换为你自己的 logo 图片
-const Logo = () => {
-  const { siteName } = useSite();
-  return (
-    <Link
-      href='/'
-      className='flex items-center justify-center h-16 select-none hover:opacity-80 transition-opacity duration-200'
-    >
-      <span className='text-2xl font-bold text-[#f0b90b] tracking-tight'>
-        {siteName}
-      </span>
-    </Link>
-  );
-};
 
 interface SidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -165,7 +150,14 @@ const Sidebar = ({ onToggle, activePath = '/' }: SidebarProps) => {
                 }`}
               >
                 <div className='w-[calc(100%-4rem)] flex justify-center'>
-                  {!isCollapsed && <Logo />}
+                  {!isCollapsed && (
+                    <BrandLogo
+                      className='w-[176px]'
+                      imageClassName='rounded-sm'
+                      priority
+                      sizes='176px'
+                    />
+                  )}
                 </div>
               </div>
               <button

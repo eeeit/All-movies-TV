@@ -245,6 +245,8 @@ function HomeClient() {
       : traktTvShows.length > 0
       ? traktTvShows
       : hotTvShows;
+  const homeSectionItemLimit = 15;
+  const rankingItemLimit = 12;
 
   type HeroContent = {
     title?: string;
@@ -255,9 +257,25 @@ function HomeClient() {
   };
 
   // 轮播图优先固定走 TMDb，保证图片来源和质量更稳定
+  const tmdbMovieBackdropHeroes = tmdbMovies.filter((item) => item.backdrop);
+  const tmdbTvBackdropHeroes = tmdbTvShows.filter((item) => item.backdrop);
+  const tmdbMoviePosterFallbacks = tmdbMovies.filter(
+    (item) => !item.backdrop && item.poster
+  );
+  const tmdbTvPosterFallbacks = tmdbTvShows.filter(
+    (item) => !item.backdrop && item.poster
+  );
   const tmdbHeroSource = [
-    ...tmdbMovies.filter((item) => item.backdrop || item.poster).slice(0, 4),
-    ...tmdbTvShows.filter((item) => item.backdrop || item.poster).slice(0, 2),
+    ...tmdbMovieBackdropHeroes.slice(0, 4),
+    ...tmdbTvBackdropHeroes.slice(0, 2),
+    ...tmdbMoviePosterFallbacks.slice(
+      0,
+      Math.max(0, 4 - tmdbMovieBackdropHeroes.length)
+    ),
+    ...tmdbTvPosterFallbacks.slice(
+      0,
+      Math.max(0, 2 - tmdbTvBackdropHeroes.length)
+    ),
   ];
   const fallbackHeroSource = [
     ...displayMovies.slice(0, 4),
@@ -280,25 +298,29 @@ function HomeClient() {
   const heroImageUrl = heroPoster ? processImageUrl(heroPoster) : '';
   const heroSummary = heroItem?.overview || heroItem?.summary || '';
 
-  const rankingItems = displayMovies.slice(0, 12).map((item, index) => ({
-    ...item,
-    rank: index + 1,
-    group: t('movie'),
-  }));
-  const seriesRankingItems = displayTvShows.slice(0, 12).map((item, index) => ({
-    ...item,
-    rank: index + 1,
-    group: t('hotSeries'),
-  }));
-  const movieGridItems = displayMovies.slice(0, 12);
-  const seriesGridItems = displayTvShows.slice(0, 12);
+  const rankingItems = displayMovies
+    .slice(0, rankingItemLimit)
+    .map((item, index) => ({
+      ...item,
+      rank: index + 1,
+      group: t('movie'),
+    }));
+  const seriesRankingItems = displayTvShows
+    .slice(0, rankingItemLimit)
+    .map((item, index) => ({
+      ...item,
+      rank: index + 1,
+      group: t('hotSeries'),
+    }));
+  const movieGridItems = displayMovies.slice(0, homeSectionItemLimit);
+  const seriesGridItems = displayTvShows.slice(0, homeSectionItemLimit);
   const varietySourceItems =
     hotVarietyShows.length > 0
       ? hotVarietyShows
       : hotTvShows.length > 0
       ? hotTvShows
       : displayTvShows;
-  const varietyGridItems = varietySourceItems.slice(0, 12);
+  const varietyGridItems = varietySourceItems.slice(0, homeSectionItemLimit);
 
   const jumpToSearch = (title: string) => {
     const targetTitle = title.trim();
@@ -346,7 +368,7 @@ function HomeClient() {
     let cancelled = false;
 
     const fetchTvmazeShows = async () => {
-      const visibleShows = displayTvShows.slice(0, 12);
+      const visibleShows = displayTvShows.slice(0, homeSectionItemLimit);
       const results = await Promise.allSettled(
         visibleShows.map((show) => getTvmazeShowSearch(show.title))
       );
@@ -383,7 +405,7 @@ function HomeClient() {
     let cancelled = false;
 
     const fetchOmdbMovies = async () => {
-      const visibleMovies = displayMovies.slice(0, 12);
+      const visibleMovies = displayMovies.slice(0, homeSectionItemLimit);
       const results = await Promise.allSettled(
         visibleMovies.map((movie) =>
           getOmdbLookup({ query: movie.title, type: 'movie' })
@@ -422,7 +444,7 @@ function HomeClient() {
     let cancelled = false;
 
     const fetchOmdbTvShows = async () => {
-      const visibleTvShows = displayTvShows.slice(0, 12);
+      const visibleTvShows = displayTvShows.slice(0, homeSectionItemLimit);
       const results = await Promise.allSettled(
         visibleTvShows.map((show) =>
           getOmdbLookup({ query: show.title, type: 'series' })
@@ -611,13 +633,15 @@ function HomeClient() {
 
                     <div className='grid grid-cols-3 gap-x-1.5 gap-y-7 sm:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] sm:gap-x-6 sm:gap-y-12'>
                       {loading
-                        ? Array.from({ length: 12 }).map((_, index) => (
-                            <div key={index}>
-                              <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
-                              <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
-                              <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
-                            </div>
-                          ))
+                        ? Array.from({ length: homeSectionItemLimit }).map(
+                            (_, index) => (
+                              <div key={index}>
+                                <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
+                              </div>
+                            )
+                          )
                         : movieGridItems.map((movie) => {
                             const omdbMovie = omdbMovies[movie.title];
                             const actualPoster =
@@ -677,13 +701,15 @@ function HomeClient() {
                       </div>
                       <div className='grid grid-cols-3 gap-x-1.5 gap-y-7 sm:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] sm:gap-x-6 sm:gap-y-12'>
                         {loading
-                          ? Array.from({ length: 12 }).map((_, index) => (
-                              <div key={index}>
-                                <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
-                                <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
-                                <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
-                              </div>
-                            ))
+                          ? Array.from({ length: homeSectionItemLimit }).map(
+                              (_, index) => (
+                                <div key={index}>
+                                  <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                  <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                  <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
+                                </div>
+                              )
+                            )
                           : seriesGridItems.map((show) => {
                               const tvmazeShow = tvmazeTvShows[show.title];
                               const omdbShow = omdbTvShows[show.title];
@@ -743,13 +769,15 @@ function HomeClient() {
                       </div>
                       <div className='grid grid-cols-3 gap-x-1.5 gap-y-7 sm:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] sm:gap-x-6 sm:gap-y-12'>
                         {loading
-                          ? Array.from({ length: 12 }).map((_, index) => (
-                              <div key={index}>
-                                <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
-                                <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
-                                <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
-                              </div>
-                            ))
+                          ? Array.from({ length: homeSectionItemLimit }).map(
+                              (_, index) => (
+                                <div key={index}>
+                                  <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                  <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                  <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
+                                </div>
+                              )
+                            )
                           : varietyGridItems.map((item) => {
                               const tvmazeShow = tvmazeTvShows[item.title];
                               const omdbItem =
@@ -826,15 +854,17 @@ function HomeClient() {
                       </p>
                       <ol className='divide-y divide-white/10'>
                         {loading
-                          ? Array.from({ length: 12 }).map((_, index) => (
-                              <li
-                                key={`movie-skeleton-${index}`}
-                                className='flex items-center gap-3 py-2.5 sm:py-3'
-                              >
-                                <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
-                                <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
-                              </li>
-                            ))
+                          ? Array.from({ length: rankingItemLimit }).map(
+                              (_, index) => (
+                                <li
+                                  key={`movie-skeleton-${index}`}
+                                  className='flex items-center gap-3 py-2.5 sm:py-3'
+                                >
+                                  <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
+                                  <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
+                                </li>
+                              )
+                            )
                           : rankingItems.map((item) => {
                               const actualRate =
                                 omdbMovies[item.title]?.rate || item.rate;
@@ -888,15 +918,17 @@ function HomeClient() {
                       </p>
                       <ol className='divide-y divide-white/10'>
                         {loading
-                          ? Array.from({ length: 12 }).map((_, index) => (
-                              <li
-                                key={`series-skeleton-${index}`}
-                                className='flex items-center gap-3 py-2.5 sm:py-3'
-                              >
-                                <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
-                                <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
-                              </li>
-                            ))
+                          ? Array.from({ length: rankingItemLimit }).map(
+                              (_, index) => (
+                                <li
+                                  key={`series-skeleton-${index}`}
+                                  className='flex items-center gap-3 py-2.5 sm:py-3'
+                                >
+                                  <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
+                                  <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
+                                </li>
+                              )
+                            )
                           : seriesRankingItems.map((item) => {
                               const tvmazeShow = tvmazeTvShows[item.title];
                               const omdbShow = omdbTvShows[item.title];

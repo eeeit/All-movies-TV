@@ -5,9 +5,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
+import BrandLogo from '@/components/BrandLogo';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useLanguage } from '@/components/LanguageProvider';
-import { useSite } from '@/components/SiteProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 function LoginPageClient() {
@@ -20,7 +20,6 @@ function LoginPageClient() {
   const [loading, setLoading] = useState(false);
   const [shouldAskUsername, setShouldAskUsername] = useState(false);
   const [enableRegister, setEnableRegister] = useState(false);
-  const { siteName } = useSite();
 
   // 在客户端挂载后设置配置
   useEffect(() => {
@@ -28,7 +27,7 @@ function LoginPageClient() {
       const storageType = (window as any).RUNTIME_CONFIG?.STORAGE_TYPE;
       setShouldAskUsername(storageType && storageType !== 'localstorage');
       setEnableRegister(
-        Boolean((window as any).RUNTIME_CONFIG?.ENABLE_REGISTER),
+        Boolean((window as any).RUNTIME_CONFIG?.ENABLE_REGISTER)
       );
     }
   }, []);
@@ -103,9 +102,13 @@ function LoginPageClient() {
       </div>
       <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(23,47,59,0.45),_transparent_40%),radial-gradient(circle_at_80%_20%,_rgba(240,185,11,0.08),_transparent_25%)]' />
       <div className='relative z-10 w-full max-w-md rounded-3xl bg-[#161616]/95 border border-white/8 backdrop-blur-xl shadow-[0_28px_90px_rgba(0,0,0,0.55)] p-10'>
-        <h1 className='text-[#f0b90b] tracking-tight text-center text-3xl font-extrabold mb-8 drop-shadow-sm'>
-          {siteName}
-        </h1>
+        <BrandLogo
+          href=''
+          className='mx-auto mb-8 w-[250px]'
+          imageClassName='rounded-sm'
+          priority
+          sizes='250px'
+        />
         <form onSubmit={handleSubmit} className='space-y-8'>
           {shouldAskUsername && (
             <div>
