@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 基础排版优化：统一字号、行高、标题间距和内容容器 */
+@layer base {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    line-height: 1.15;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: rgb(200, 200, 200);
+  }
+
+  /* 内容容器，供页面统一居中与内边距 */
+  .content-container {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none; /* IE and Edge */
@@ -30,8 +70,11 @@ body {
 
 body {
   color: rgb(var(--foreground-rgb));
-  background:
-    radial-gradient(circle at top, rgba(23, 47, 59, 0.45), transparent 35%),
+  background: radial-gradient(
+      circle at top,
+      rgba(23, 47, 59, 0.45),
+      transparent 35%
+    ),
     radial-gradient(
       circle at 80% 20%,
       rgba(240, 185, 11, 0.08),
@@ -42,8 +85,11 @@ body {
 }
 
 html:not(.dark) body {
-  background:
-    radial-gradient(circle at top, rgba(23, 47, 59, 0.35), transparent 35%),
+  background: radial-gradient(
+      circle at top,
+      rgba(23, 47, 59, 0.35),
+      transparent 35%
+    ),
     radial-gradient(
       circle at 80% 20%,
       rgba(240, 185, 11, 0.08),
@@ -188,5 +234,38 @@ div[data-media-provider] video {
 
   .art-control-volume {
     display: none !important;
+  }
+}
+
+/* UI enhancements for homepage layout */
+@layer components {
+  .poster-shadow {
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .rating-badge {
+    background: #f0b90b;
+    color: #000;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+
+  .top-desktop-header {
+    background: linear-gradient(
+      180deg,
+      rgba(18, 18, 18, 0.85),
+      rgba(18, 18, 18, 0.6)
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 }

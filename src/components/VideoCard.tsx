@@ -294,11 +294,11 @@ export default function VideoCard({
 
   return (
     <div
-      className='group relative w-full rounded-lg bg-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.05] hover:z-[500]'
+      className='group relative w-full rounded-2xl bg-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.06] hover:z-[500]'
       onClick={handleClick}
     >
       {/* 海报容器 */}
-      <div className='relative aspect-[2/3] overflow-hidden rounded-lg'>
+      <div className='relative aspect-[2/3] overflow-hidden rounded-2xl poster-shadow'>
         {/* 骨架屏 */}
         {!isLoading && <ImagePlaceholder aspectRatio='aspect-[2/3]' />}
         {/* 图片 */}
@@ -359,7 +359,7 @@ export default function VideoCard({
 
         {/* 徽章 */}
         {config.showRating && rate && (
-          <div className='absolute top-2 right-2 bg-[#f0b90b] text-black text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all duration-300 ease-out group-hover:scale-110'>
+          <div className='absolute top-2 right-2 bg-[#f0b90b] text-black text-sm font-bold w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-300 ease-out group-hover:scale-110'>
             {rate}
           </div>
         )}

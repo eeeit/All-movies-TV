@@ -434,8 +434,8 @@ function HomeClient() {
             // 首页视图
             <div className='px-2 sm:px-6 pb-8'>
               {/* 强主视觉 + 右侧榜单 */}
-              <div className='grid gap-6 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.85fr)] items-stretch mb-10'>
-                <section className='relative min-h-[420px] overflow-hidden rounded-[28px] border border-white/8 bg-[#151515] shadow-[0_24px_70px_rgba(0,0,0,0.45)]'>
+              <div className='grid gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(320px,0.85fr)] items-stretch mb-10'>
+                <section className='relative min-h-[560px] overflow-hidden rounded-[36px] border border-white/8 bg-[#151515] shadow-[0_30px_90px_rgba(0,0,0,0.55)]'>
                   <div className='absolute inset-0'>
                     {heroPoster ? (
                       <img
@@ -491,7 +491,7 @@ function HomeClient() {
                   </div>
                 </section>
 
-                <aside className='rounded-[28px] border border-white/8 bg-[#181818]/95 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)]'>
+                <aside className='rounded-[28px] border border-white/8 bg-[#181818]/95 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] sticky top-24 max-h-[72vh] overflow-auto'>
                   <div className='mb-4 flex items-center justify-between'>
                     <h2 className='flex items-center gap-2 text-xl font-bold text-white'>
                       <TrendingUp className='h-5 w-5 text-[#f0b90b]' />
