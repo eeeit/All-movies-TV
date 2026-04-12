@@ -244,8 +244,8 @@ function HomeClient() {
   };
 
   const heroSlides: HeroContent[] = [
-    ...displayMovies.slice(0, 4),
-    ...displayTvShows.slice(0, 2),
+    ...displayMovies.slice(0, 6),
+    ...displayTvShows.slice(0, 4),
   ].map((item) => ({
     title: item.title,
     poster: item.poster,
@@ -257,20 +257,24 @@ function HomeClient() {
   const heroItem = heroSlides[heroIndex];
   const heroTitle = heroItem?.title || announcement || t('featuredContent');
   const heroPoster = heroItem?.backdrop || heroItem?.poster || '';
+  const heroUsesBackdrop = Boolean(heroItem?.backdrop);
+  const heroImageUrl = heroPoster ? processImageUrl(heroPoster) : '';
   const heroSummary =
     heroItem?.overview || heroItem?.summary || t('visualRebuildSummary');
 
-  const rankingItems = displayMovies.slice(0, 9).map((item, index) => ({
+  const rankingItems = displayMovies.slice(0, 12).map((item, index) => ({
     ...item,
     rank: index + 1,
     group: t('movie'),
   }));
-  const movieGridItems = displayMovies.slice(0, 6);
-  const seriesGridItems = displayTvShows.slice(0, 4);
+  const movieGridItems = displayMovies.slice(0, 8);
+  const seriesGridItems = displayTvShows.slice(0, 8);
   const varietyGridItems = [
-    ...displayTvShows.slice(4, 6),
-    ...displayMovies.slice(6, 8),
-  ].slice(0, 4);
+    ...displayTvShows.slice(8),
+    ...displayMovies.slice(8),
+    ...displayTvShows,
+    ...displayMovies,
+  ].slice(0, 8);
 
   const jumpToSearch = (title: string) => {
     const targetTitle = title.trim();
@@ -485,11 +489,25 @@ function HomeClient() {
                   <section className='relative aspect-[16/10] sm:aspect-[21/9] overflow-hidden rounded-[1.4rem] sm:rounded-[1.8rem] border border-white/10 bg-[#141414] shadow-[0_24px_70px_rgba(0,0,0,0.48)]'>
                     <div className='absolute inset-0'>
                       {heroPoster ? (
-                        <img
-                          src={processImageUrl(heroPoster)}
-                          alt={heroTitle}
-                          className='h-full w-full object-cover'
-                        />
+                        <>
+                          {!heroUsesBackdrop && (
+                            <img
+                              src={heroImageUrl}
+                              alt=''
+                              aria-hidden='true'
+                              className='absolute inset-0 h-full w-full object-cover scale-110 blur-2xl opacity-35'
+                            />
+                          )}
+                          <img
+                            src={heroImageUrl}
+                            alt={heroTitle}
+                            className={`h-full w-full ${
+                              heroUsesBackdrop
+                                ? 'object-cover'
+                                : 'object-contain'
+                            }`}
+                          />
+                        </>
                       ) : (
                         <div className='h-full w-full bg-[radial-gradient(circle_at_18%_18%,_rgba(212,175,55,0.2),_transparent_42%),linear-gradient(120deg,_#0f0f0f,_#1a1a1a)]' />
                       )}
@@ -560,51 +578,125 @@ function HomeClient() {
                     </div>
                   </section>
 
-                  <div className='flex flex-col xl:flex-row gap-7 xl:gap-8'>
-                    <section className='xl:w-7/12'>
+                  <section>
+                    <div className='mb-4 sm:mb-5 flex items-center justify-between'>
+                      <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                        <Flame className='h-5 w-5 text-[#d4af37]' />
+                        {t('hotMovies')}
+                      </h2>
+                      <Link
+                        href='/douban?type=movie'
+                        className='flex items-center gap-1 text-xs sm:text-sm text-neutral-400 hover:text-white'
+                      >
+                        {t('more')}
+                        <ChevronRight className='h-4 w-4' />
+                      </Link>
+                    </div>
+
+                    <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 sm:gap-4'>
+                      {loading
+                        ? Array.from({ length: 8 }).map((_, index) => (
+                            <div key={index}>
+                              <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                              <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                              <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
+                            </div>
+                          ))
+                        : movieGridItems.map((movie) => {
+                            const omdbMovie = omdbMovies[movie.title];
+                            const actualPoster =
+                              omdbMovie?.poster || movie.poster;
+                            const actualRate = omdbMovie?.rate || movie.rate;
+
+                            return (
+                              <button
+                                key={movie.title}
+                                className='group text-left space-y-0.5'
+                                onClick={() => jumpToSearch(movie.title)}
+                              >
+                                <div className='relative aspect-[2/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
+                                  {actualPoster ? (
+                                    <img
+                                      src={processImageUrl(actualPoster)}
+                                      alt={movie.title}
+                                      className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                                    />
+                                  ) : null}
+                                  <div className='absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent' />
+                                  <span className='absolute right-2 top-2 rounded bg-black/75 px-2 py-1 text-[11px] leading-none font-bold text-[#d4af37]'>
+                                    {actualRate || '—'}
+                                  </span>
+                                  <div className='absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100'>
+                                    <span className='rounded-full bg-[#d4af37] p-2.5 text-black shadow-[0_10px_24px_rgba(0,0,0,0.4)]'>
+                                      <PlayCircle className='h-5 w-5 fill-black' />
+                                    </span>
+                                  </div>
+                                </div>
+                                <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
+                                  {movie.title}
+                                </h3>
+                                <p className='mt-1 text-[11px] sm:text-xs text-neutral-400'>
+                                  {movie.year || '—'}
+                                </p>
+                              </button>
+                            );
+                          })}
+                    </div>
+                  </section>
+
+                  <div className='grid gap-7 lg:grid-cols-2'>
+                    <section>
                       <div className='mb-4 sm:mb-5 flex items-center justify-between'>
                         <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
-                          <Flame className='h-5 w-5 text-[#d4af37]' />
-                          {t('hotMovies')}
+                          <Sparkles className='h-5 w-5 text-[#d4af37]' />
+                          {t('hotSeries')}
                         </h2>
                         <Link
-                          href='/douban?type=movie'
+                          href='/douban?type=tv'
                           className='flex items-center gap-1 text-xs sm:text-sm text-neutral-400 hover:text-white'
                         >
                           {t('more')}
                           <ChevronRight className='h-4 w-4' />
                         </Link>
                       </div>
-
-                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4'>
+                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 sm:gap-4'>
                         {loading
-                          ? Array.from({ length: 6 }).map((_, index) => (
+                          ? Array.from({ length: 8 }).map((_, index) => (
                               <div key={index}>
                                 <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
                                 <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
                                 <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
                               </div>
                             ))
-                          : movieGridItems.map((movie) => {
-                              const omdbMovie = omdbMovies[movie.title];
+                          : seriesGridItems.map((show) => {
+                              const tvmazeShow = tvmazeTvShows[show.title];
+                              const omdbShow = omdbTvShows[show.title];
                               const actualPoster =
-                                omdbMovie?.poster || movie.poster;
-                              const actualRate = omdbMovie?.rate || movie.rate;
+                                tvmazeShow?.poster ||
+                                omdbShow?.poster ||
+                                show.poster;
+                              const actualRate =
+                                tvmazeShow?.rate || omdbShow?.rate || show.rate;
+                              const seriesYear =
+                                tvmazeShow?.year ||
+                                omdbShow?.year ||
+                                t('updating');
 
                               return (
                                 <button
-                                  key={movie.title}
+                                  key={show.title}
                                   className='group text-left space-y-0.5'
-                                  onClick={() => jumpToSearch(movie.title)}
+                                  onClick={() => jumpToSearch(show.title)}
                                 >
                                   <div className='relative aspect-[2/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
                                     {actualPoster ? (
                                       <img
                                         src={processImageUrl(actualPoster)}
-                                        alt={movie.title}
+                                        alt={show.title}
                                         className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
                                       />
                                     ) : null}
+                                    <div className='absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent' />
                                     <span className='absolute right-2 top-2 rounded bg-black/75 px-2 py-1 text-[11px] leading-none font-bold text-[#d4af37]'>
                                       {actualRate || '—'}
                                     </span>
@@ -615,10 +707,10 @@ function HomeClient() {
                                     </div>
                                   </div>
                                   <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
-                                    {movie.title}
+                                    {show.title}
                                   </h3>
                                   <p className='mt-1 text-[11px] sm:text-xs text-neutral-400'>
-                                    {movie.year || '—'}
+                                    {seriesYear}
                                   </p>
                                 </button>
                               );
@@ -626,114 +718,73 @@ function HomeClient() {
                       </div>
                     </section>
 
-                    <div className='flex flex-1 flex-col gap-7 xl:w-5/12'>
-                      <section>
-                        <div className='mb-4 sm:mb-5 flex items-center justify-between'>
-                          <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
-                            <Sparkles className='h-5 w-5 text-[#d4af37]' />
-                            {t('hotSeries')}
-                          </h2>
-                          <Link
-                            href='/douban?type=tv'
-                            className='flex items-center gap-1 text-xs sm:text-sm text-neutral-400 hover:text-white'
-                          >
-                            {t('more')}
-                            <ChevronRight className='h-4 w-4' />
-                          </Link>
-                        </div>
-                        <div className='grid grid-cols-2 gap-3 sm:gap-4'>
-                          {loading
-                            ? Array.from({ length: 4 }).map((_, index) => (
-                                <div key={index}>
-                                  <div className='aspect-[16/10] sm:aspect-[4/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
-                                  <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
-                                </div>
-                              ))
-                            : seriesGridItems.map((show) => {
-                                const tvmazeShow = tvmazeTvShows[show.title];
-                                const omdbShow = omdbTvShows[show.title];
-                                const actualPoster =
-                                  tvmazeShow?.poster ||
-                                  omdbShow?.poster ||
-                                  show.poster;
+                    <section>
+                      <div className='mb-4 sm:mb-5 flex items-center justify-between'>
+                        <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
+                          <Sparkles className='h-5 w-5 text-[#d4af37]' />
+                          {t('variety')}
+                        </h2>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 sm:gap-4'>
+                        {loading
+                          ? Array.from({ length: 8 }).map((_, index) => (
+                              <div key={index}>
+                                <div className='aspect-[2/3] rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
+                                <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
+                                <div className='mt-1.5 h-3 w-2/3 rounded bg-white/10 animate-pulse' />
+                              </div>
+                            ))
+                          : varietyGridItems.map((item) => {
+                              const tvmazeShow = tvmazeTvShows[item.title];
+                              const omdbItem =
+                                omdbTvShows[item.title] ||
+                                omdbMovies[item.title];
+                              const actualPoster =
+                                tvmazeShow?.poster ||
+                                omdbItem?.poster ||
+                                item.poster;
+                              const actualRate =
+                                tvmazeShow?.rate || omdbItem?.rate || item.rate;
+                              const varietyYear =
+                                tvmazeShow?.year ||
+                                omdbItem?.year ||
+                                t('updating');
 
-                                return (
-                                  <button
-                                    key={show.title}
-                                    className='group text-left space-y-0.5'
-                                    onClick={() => jumpToSearch(show.title)}
-                                  >
-                                    <div className='relative aspect-[16/10] sm:aspect-[4/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
-                                      {actualPoster ? (
-                                        <img
-                                          src={processImageUrl(actualPoster)}
-                                          alt={show.title}
-                                          className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
-                                        />
-                                      ) : null}
-                                      <span className='absolute bottom-2 right-2 rounded bg-black/75 px-2 py-1 text-[10px] sm:text-[11px] leading-none text-white'>
-                                        {t('updating')}
+                              return (
+                                <button
+                                  key={item.title}
+                                  className='group text-left space-y-0.5'
+                                  onClick={() => jumpToSearch(item.title)}
+                                >
+                                  <div className='relative aspect-[2/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
+                                    {actualPoster ? (
+                                      <img
+                                        src={processImageUrl(actualPoster)}
+                                        alt={item.title}
+                                        className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                                      />
+                                    ) : null}
+                                    <div className='absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent' />
+                                    <span className='absolute right-2 top-2 rounded bg-black/75 px-2 py-1 text-[11px] leading-none font-bold text-[#d4af37]'>
+                                      {actualRate || '—'}
+                                    </span>
+                                    <div className='absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100'>
+                                      <span className='rounded-full bg-[#d4af37] p-2.5 text-black shadow-[0_10px_24px_rgba(0,0,0,0.4)]'>
+                                        <PlayCircle className='h-5 w-5 fill-black' />
                                       </span>
                                     </div>
-                                    <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
-                                      {show.title}
-                                    </h3>
-                                  </button>
-                                );
-                              })}
-                        </div>
-                      </section>
-
-                      <section>
-                        <div className='mb-4 sm:mb-5 flex items-center justify-between'>
-                          <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
-                            <Sparkles className='h-5 w-5 text-[#d4af37]' />
-                            {t('variety')}
-                          </h2>
-                        </div>
-                        <div className='grid grid-cols-2 gap-3 sm:gap-4'>
-                          {loading
-                            ? Array.from({ length: 4 }).map((_, index) => (
-                                <div key={index}>
-                                  <div className='aspect-[16/10] sm:aspect-video rounded-xl sm:rounded-2xl bg-white/10 animate-pulse' />
-                                  <div className='mt-2.5 h-3.5 rounded bg-white/10 animate-pulse' />
-                                </div>
-                              ))
-                            : varietyGridItems.map((item) => {
-                                const tvmazeShow = tvmazeTvShows[item.title];
-                                const omdbItem =
-                                  omdbTvShows[item.title] ||
-                                  omdbMovies[item.title];
-                                const actualPoster =
-                                  tvmazeShow?.poster ||
-                                  omdbItem?.poster ||
-                                  item.poster;
-
-                                return (
-                                  <button
-                                    key={item.title}
-                                    className='group text-left space-y-0.5'
-                                    onClick={() => jumpToSearch(item.title)}
-                                  >
-                                    <div className='relative aspect-[16/10] sm:aspect-video overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
-                                      {actualPoster ? (
-                                        <img
-                                          src={processImageUrl(actualPoster)}
-                                          alt={item.title}
-                                          className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
-                                        />
-                                      ) : null}
-                                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent' />
-                                    </div>
-                                    <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
-                                      {item.title}
-                                    </h3>
-                                  </button>
-                                );
-                              })}
-                        </div>
-                      </section>
-                    </div>
+                                  </div>
+                                  <h3 className='mt-2.5 truncate text-[13px] sm:text-sm font-semibold leading-5 text-neutral-100 transition-colors group-hover:text-[#d4af37]'>
+                                    {item.title}
+                                  </h3>
+                                  <p className='mt-1 text-[11px] sm:text-xs text-neutral-400'>
+                                    {varietyYear}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                      </div>
+                    </section>
                   </div>
                 </div>
 
@@ -754,7 +805,7 @@ function HomeClient() {
 
                   <div className='space-y-2.5 sm:space-y-3'>
                     {loading
-                      ? Array.from({ length: 9 }).map((_, index) => (
+                      ? Array.from({ length: 12 }).map((_, index) => (
                           <div
                             key={index}
                             className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'

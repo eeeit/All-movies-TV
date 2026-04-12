@@ -34,10 +34,34 @@ export function getImageProxyUrl(): string | null {
 export function processImageUrl(originalUrl: string): string {
   if (!originalUrl) return originalUrl;
 
-  const proxyUrl = getImageProxyUrl();
-  if (!proxyUrl) return originalUrl;
+  // 已经是站内图片代理地址时，直接返回，避免重复包裹
+  if (originalUrl.includes('/api/image-proxy?url=')) {
+    return originalUrl;
+  }
 
-  return `${proxyUrl}${encodeURIComponent(originalUrl)}`;
+  // data/blob URL 不需要代理
+  if (originalUrl.startsWith('data:') || originalUrl.startsWith('blob:')) {
+    return originalUrl;
+  }
+
+  const encoded = encodeURIComponent(originalUrl);
+  const proxyUrl = getImageProxyUrl();
+  if (proxyUrl) {
+    return `${proxyUrl}${encoded}`;
+  }
+
+  // 未显式开启代理时，对易被浏览器拦截的豆瓣图片自动走站内代理
+  try {
+    const parsed = new URL(originalUrl);
+    const host = parsed.hostname.toLowerCase();
+    if (host.endsWith('doubanio.com')) {
+      return `/api/image-proxy?url=${encoded}`;
+    }
+  } catch {
+    // 非绝对 URL 直接返回原值
+  }
+
+  return originalUrl;
 }
 
 export function cleanHtmlTags(text: string): string {
