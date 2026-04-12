@@ -33,6 +33,7 @@ import {
   TraktItem,
   TvmazeItem,
 } from '@/lib/types';
+import { processImageUrl } from '@/lib/utils';
 
 import CapsuleSwitch from '@/components/CapsuleSwitch';
 import PageLayout from '@/components/PageLayout';
@@ -445,7 +446,7 @@ function HomeClient() {
                     <div className='absolute inset-0'>
                       {heroPoster ? (
                         <img
-                          src={heroPoster}
+                          src={processImageUrl(heroPoster)}
                           alt={heroTitle}
                           className='h-full w-full object-cover'
                         />
@@ -552,7 +553,7 @@ function HomeClient() {
                                   <div className='relative aspect-[2/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
                                     {actualPoster ? (
                                       <img
-                                        src={actualPoster}
+                                        src={processImageUrl(actualPoster)}
                                         alt={movie.title}
                                         className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
                                       />
@@ -618,7 +619,7 @@ function HomeClient() {
                                     <div className='relative aspect-[16/10] sm:aspect-[4/3] overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
                                       {actualPoster ? (
                                         <img
-                                          src={actualPoster}
+                                          src={processImageUrl(actualPoster)}
                                           alt={show.title}
                                           className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
                                         />
@@ -670,7 +671,7 @@ function HomeClient() {
                                     <div className='relative aspect-[16/10] sm:aspect-video overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-[#1a1a1a]'>
                                       {actualPoster ? (
                                         <img
-                                          src={actualPoster}
+                                          src={processImageUrl(actualPoster)}
                                           alt={item.title}
                                           className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
                                         />
@@ -732,7 +733,7 @@ function HomeClient() {
                               <div className='h-11 w-8 sm:h-12 sm:w-9 overflow-hidden rounded-md bg-[#242424]'>
                                 {actualPoster ? (
                                   <img
-                                    src={actualPoster}
+                                    src={processImageUrl(actualPoster)}
                                     alt={item.title}
                                     className='h-full w-full object-cover'
                                   />

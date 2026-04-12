@@ -79,6 +79,14 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* 兼容部分运行时将函数名辅助器注入到内联脚本场景 */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'window.__name = window.__name || function (fn) { return fn; };',
+          }}
+        />
         {/* 将配置序列化后直接写入脚本，浏览器端可通过 window.RUNTIME_CONFIG 获取 */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script
