@@ -286,6 +286,11 @@ function HomeClient() {
     rank: index + 1,
     group: t('movie'),
   }));
+  const seriesRankingItems = displayTvShows.slice(0, 12).map((item, index) => ({
+    ...item,
+    rank: index + 1,
+    group: t('hotSeries'),
+  }));
   const movieGridItems = displayMovies.slice(0, 8);
   const seriesGridItems = displayTvShows.slice(0, 8);
   const varietySourceItems =
@@ -809,60 +814,130 @@ function HomeClient() {
                     </Link>
                   </div>
 
-                  <div className='space-y-2.5 sm:space-y-3'>
-                    {loading
-                      ? Array.from({ length: 12 }).map((_, index) => (
-                          <div
-                            key={index}
-                            className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'
-                          >
-                            <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
-                            <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
-                          </div>
-                        ))
-                      : rankingItems.map((item) => {
-                          const actualRate =
-                            omdbMovies[item.title]?.rate || item.rate;
-                          const top3ColorClass =
-                            item.rank === 1
-                              ? 'text-[#f0c94d]'
-                              : item.rank === 2
-                              ? 'text-[#c7ced6]'
-                              : item.rank === 3
-                              ? 'text-[#d89157]'
-                              : 'text-neutral-500';
+                  <div className='space-y-5 sm:space-y-6'>
+                    <section>
+                      <p className='mb-2 text-[11px] sm:text-xs font-semibold tracking-[0.08em] text-neutral-500 uppercase'>
+                        {t('movie')}
+                      </p>
+                      <div className='space-y-2.5 sm:space-y-3'>
+                        {loading
+                          ? Array.from({ length: 12 }).map((_, index) => (
+                              <div
+                                key={`movie-skeleton-${index}`}
+                                className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'
+                              >
+                                <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
+                                <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
+                              </div>
+                            ))
+                          : rankingItems.map((item) => {
+                              const actualRate =
+                                omdbMovies[item.title]?.rate || item.rate;
+                              const top3ColorClass =
+                                item.rank === 1
+                                  ? 'text-[#f0c94d]'
+                                  : item.rank === 2
+                                  ? 'text-[#c7ced6]'
+                                  : item.rank === 3
+                                  ? 'text-[#d89157]'
+                                  : 'text-neutral-500';
 
-                          return (
-                            <button
-                              key={`${item.title}-${item.rank}`}
-                              className='flex w-full items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/[0.03] p-2.5 sm:p-3 text-left transition-colors hover:border-[#d4af37]/35 hover:bg-white/[0.08]'
-                              onClick={() => jumpToSearch(item.title)}
-                            >
-                              <div className='flex h-8 w-8 items-center justify-center shrink-0'>
-                                {item.rank <= 3 ? (
-                                  <Medal
-                                    className={`h-5 w-5 ${top3ColorClass}`}
-                                  />
-                                ) : (
-                                  <span className='text-xs font-semibold text-neutral-500'>
-                                    #{item.rank}
-                                  </span>
-                                )}
+                              return (
+                                <button
+                                  key={`${item.title}-${item.rank}`}
+                                  className='flex w-full items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/[0.03] p-2.5 sm:p-3 text-left transition-colors hover:border-[#d4af37]/35 hover:bg-white/[0.08]'
+                                  onClick={() => jumpToSearch(item.title)}
+                                >
+                                  <div className='flex h-8 w-8 items-center justify-center shrink-0'>
+                                    {item.rank <= 3 ? (
+                                      <Medal
+                                        className={`h-5 w-5 ${top3ColorClass}`}
+                                      />
+                                    ) : (
+                                      <span className='text-xs font-semibold text-neutral-500'>
+                                        #{item.rank}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className='min-w-0 flex-1'>
+                                    <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
+                                      {item.title}
+                                    </p>
+                                    <p className='mt-0.5 truncate text-[11px] sm:text-xs text-neutral-400'>
+                                      {item.group}
+                                    </p>
+                                  </div>
+                                  <p className='text-[13px] sm:text-sm font-bold text-[#d4af37]'>
+                                    {actualRate || '—'}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                      </div>
+                    </section>
+
+                    <section className='border-t border-white/10 pt-4 sm:pt-5'>
+                      <p className='mb-2 text-[11px] sm:text-xs font-semibold tracking-[0.08em] text-neutral-500 uppercase'>
+                        {t('hotSeries')}
+                      </p>
+                      <div className='space-y-2.5 sm:space-y-3'>
+                        {loading
+                          ? Array.from({ length: 12 }).map((_, index) => (
+                              <div
+                                key={`series-skeleton-${index}`}
+                                className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'
+                              >
+                                <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
+                                <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
                               </div>
-                              <div className='min-w-0 flex-1'>
-                                <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
-                                  {item.title}
-                                </p>
-                                <p className='mt-0.5 truncate text-[11px] sm:text-xs text-neutral-400'>
-                                  {item.group}
-                                </p>
-                              </div>
-                              <p className='text-[13px] sm:text-sm font-bold text-[#d4af37]'>
-                                {actualRate || '—'}
-                              </p>
-                            </button>
-                          );
-                        })}
+                            ))
+                          : seriesRankingItems.map((item) => {
+                              const tvmazeShow = tvmazeTvShows[item.title];
+                              const omdbShow = omdbTvShows[item.title];
+                              const actualRate =
+                                tvmazeShow?.rate || omdbShow?.rate || item.rate;
+                              const top3ColorClass =
+                                item.rank === 1
+                                  ? 'text-[#f0c94d]'
+                                  : item.rank === 2
+                                  ? 'text-[#c7ced6]'
+                                  : item.rank === 3
+                                  ? 'text-[#d89157]'
+                                  : 'text-neutral-500';
+
+                              return (
+                                <button
+                                  key={`${item.title}-${item.rank}-series`}
+                                  className='flex w-full items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/[0.03] p-2.5 sm:p-3 text-left transition-colors hover:border-[#d4af37]/35 hover:bg-white/[0.08]'
+                                  onClick={() => jumpToSearch(item.title)}
+                                >
+                                  <div className='flex h-8 w-8 items-center justify-center shrink-0'>
+                                    {item.rank <= 3 ? (
+                                      <Medal
+                                        className={`h-5 w-5 ${top3ColorClass}`}
+                                      />
+                                    ) : (
+                                      <span className='text-xs font-semibold text-neutral-500'>
+                                        #{item.rank}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className='min-w-0 flex-1'>
+                                    <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
+                                      {item.title}
+                                    </p>
+                                    <p className='mt-0.5 truncate text-[11px] sm:text-xs text-neutral-400'>
+                                      {item.group}
+                                    </p>
+                                  </div>
+                                  <p className='text-[13px] sm:text-sm font-bold text-[#d4af37]'>
+                                    {actualRate || '—'}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                      </div>
+                    </section>
                   </div>
                 </aside>
               </div>
