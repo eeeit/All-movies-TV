@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Clapperboard,
   Flame,
+  Medal,
   PlayCircle,
   Sparkles,
   TrendingUp,
@@ -257,7 +258,6 @@ function HomeClient() {
   const heroItem = heroSlides[heroIndex];
   const heroTitle = heroItem?.title || announcement || t('featuredContent');
   const heroPoster = heroItem?.backdrop || heroItem?.poster || '';
-  const heroUsesBackdrop = Boolean(heroItem?.backdrop);
   const heroImageUrl = heroPoster ? processImageUrl(heroPoster) : '';
   const heroSummary =
     heroItem?.overview || heroItem?.summary || t('visualRebuildSummary');
@@ -489,25 +489,11 @@ function HomeClient() {
                   <section className='relative aspect-[16/10] sm:aspect-[21/9] overflow-hidden rounded-[1.4rem] sm:rounded-[1.8rem] border border-white/10 bg-[#141414] shadow-[0_24px_70px_rgba(0,0,0,0.48)]'>
                     <div className='absolute inset-0'>
                       {heroPoster ? (
-                        <>
-                          {!heroUsesBackdrop && (
-                            <img
-                              src={heroImageUrl}
-                              alt=''
-                              aria-hidden='true'
-                              className='absolute inset-0 h-full w-full object-cover scale-110 blur-2xl opacity-35'
-                            />
-                          )}
-                          <img
-                            src={heroImageUrl}
-                            alt={heroTitle}
-                            className={`h-full w-full ${
-                              heroUsesBackdrop
-                                ? 'object-cover'
-                                : 'object-contain'
-                            }`}
-                          />
-                        </>
+                        <img
+                          src={heroImageUrl}
+                          alt={heroTitle}
+                          className='h-full w-full object-cover'
+                        />
                       ) : (
                         <div className='h-full w-full bg-[radial-gradient(circle_at_18%_18%,_rgba(212,175,55,0.2),_transparent_42%),linear-gradient(120deg,_#0f0f0f,_#1a1a1a)]' />
                       )}
@@ -644,7 +630,7 @@ function HomeClient() {
                     </div>
                   </section>
 
-                  <div className='grid gap-7 lg:grid-cols-2'>
+                  <div className='space-y-7'>
                     <section>
                       <div className='mb-4 sm:mb-5 flex items-center justify-between'>
                         <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
@@ -659,7 +645,7 @@ function HomeClient() {
                           <ChevronRight className='h-4 w-4' />
                         </Link>
                       </div>
-                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 sm:gap-4'>
+                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 sm:gap-4'>
                         {loading
                           ? Array.from({ length: 8 }).map((_, index) => (
                               <div key={index}>
@@ -725,7 +711,7 @@ function HomeClient() {
                           {t('variety')}
                         </h2>
                       </div>
-                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 sm:gap-4'>
+                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 sm:gap-4'>
                         {loading
                           ? Array.from({ length: 8 }).map((_, index) => (
                               <div key={index}>
@@ -810,14 +796,21 @@ function HomeClient() {
                             key={index}
                             className='flex items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/5 p-2.5 sm:p-3'
                           >
-                            <div className='w-7 sm:w-8 aspect-[2/3] rounded-lg bg-white/10 animate-pulse' />
+                            <div className='h-6 w-6 rounded-full bg-white/10 animate-pulse' />
                             <div className='h-9 sm:h-10 flex-1 rounded-lg bg-white/10 animate-pulse' />
                           </div>
                         ))
                       : rankingItems.map((item) => {
-                          const omdbMovie = omdbMovies[item.title];
-                          const actualPoster = omdbMovie?.poster || item.poster;
-                          const actualRate = omdbMovie?.rate || item.rate;
+                          const actualRate =
+                            omdbMovies[item.title]?.rate || item.rate;
+                          const top3ColorClass =
+                            item.rank === 1
+                              ? 'text-[#f0c94d]'
+                              : item.rank === 2
+                              ? 'text-[#c7ced6]'
+                              : item.rank === 3
+                              ? 'text-[#d89157]'
+                              : 'text-neutral-500';
 
                           return (
                             <button
@@ -825,17 +818,16 @@ function HomeClient() {
                               className='flex w-full items-center gap-3 rounded-xl sm:rounded-2xl border border-white/6 bg-white/[0.03] p-2.5 sm:p-3 text-left transition-colors hover:border-[#d4af37]/35 hover:bg-white/[0.08]'
                               onClick={() => jumpToSearch(item.title)}
                             >
-                              <div className='flex h-9 w-7 sm:h-10 sm:w-8 items-center justify-center text-base sm:text-lg font-black text-[#d4af37]'>
-                                {item.rank === 1 ? '1' : item.rank}
-                              </div>
-                              <div className='w-8 sm:w-9 aspect-[2/3] overflow-hidden rounded-md bg-[#242424] shrink-0'>
-                                {actualPoster ? (
-                                  <img
-                                    src={processImageUrl(actualPoster)}
-                                    alt={item.title}
-                                    className='h-full w-full object-cover'
+                              <div className='flex h-8 w-8 items-center justify-center shrink-0'>
+                                {item.rank <= 3 ? (
+                                  <Medal
+                                    className={`h-5 w-5 ${top3ColorClass}`}
                                   />
-                                ) : null}
+                                ) : (
+                                  <span className='text-xs font-semibold text-neutral-500'>
+                                    #{item.rank}
+                                  </span>
+                                )}
                               </div>
                               <div className='min-w-0 flex-1'>
                                 <p className='truncate text-[13px] sm:text-sm font-semibold text-neutral-100'>
