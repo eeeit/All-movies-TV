@@ -294,11 +294,11 @@ export default function VideoCard({
 
   return (
     <div
-      className='group relative w-full rounded-2xl bg-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.06] hover:z-[500]'
+      className='group relative w-full rounded-lg bg-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.06] hover:z-[500]'
       onClick={handleClick}
     >
       {/* 海报容器 */}
-      <div className='relative aspect-[2/3] overflow-hidden rounded-2xl poster-shadow'>
+      <div className='relative aspect-[2/3] overflow-hidden rounded-lg poster-shadow'>
         {/* 骨架屏 */}
         {!isLoading && <ImagePlaceholder aspectRatio='aspect-[2/3]' />}
         {/* 图片 */}

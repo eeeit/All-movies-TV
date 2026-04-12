@@ -460,7 +460,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                         onClick={() =>
                           !isCurrentSource && handleSourceClick(source)
                         }
-                        className={`flex items-start gap-3 px-2 py-3 rounded-lg transition-all select-none duration-200 relative
+                        className={`flex items-start gap-3 px-2 py-3 rounded-sm transition-all select-none duration-200 relative
                       ${
                         isCurrentSource
                           ? 'bg-[#f0b90b]/10 dark:bg-[#f0b90b]/20 border-[#f0b90b]/30 border'
@@ -468,7 +468,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                       }`.trim()}
                       >
                         {/* 封面 */}
-                        <div className='flex-shrink-0 w-12 h-20 bg-white/10 rounded overflow-hidden'>
+                        <div className='flex-shrink-0 w-12 h-20 bg-white/10 rounded-[3px] overflow-hidden'>
                           {source.episodes && source.episodes.length > 0 && (
                             <img
                               src={processImageUrl(source.poster)}

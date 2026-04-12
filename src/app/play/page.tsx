@@ -1657,7 +1657,7 @@ function PlayPageClient() {
           {/* 封面展示 */}
           <div className='hidden md:block md:col-span-1 md:order-first'>
             <div className='pl-0 py-4 pr-6'>
-              <div className='bg-white/10 aspect-[2/3] flex items-center justify-center rounded-xl overflow-hidden'>
+              <div className='bg-white/10 aspect-[2/3] flex items-center justify-center rounded-md overflow-hidden'>
                 {videoCover ? (
                   <img
                     src={processImageUrl(videoCover)}
