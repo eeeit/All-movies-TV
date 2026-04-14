@@ -2,6 +2,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  SearchHistoryApiResponse,
+  SearchHistoryMutationApiRequest,
+  SuccessResponse,
+} from '@shared/api-contract';
+
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
 // 最大保存条数（与客户端保持一致）
@@ -16,17 +23,17 @@ export async function GET(request: NextRequest) {
     // 从 cookie 获取用户信息
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
 
     const history = await db.getSearchHistory(authInfo.username);
-    return NextResponse.json(history, { status: 200 });
+    const responseBody: SearchHistoryApiResponse = history;
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (err) {
     console.error('获取搜索历史失败', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = { error: 'Internal Server Error' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }
 
@@ -39,30 +46,31 @@ export async function POST(request: NextRequest) {
     // 从 cookie 获取用户信息
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
 
-    const body = await request.json();
-    const keyword: string = body.keyword?.trim();
+    const body = (await request.json()) as SearchHistoryMutationApiRequest;
+    const keyword = body.keyword?.trim();
 
     if (!keyword) {
-      return NextResponse.json(
-        { error: 'Keyword is required' },
-        { status: 400 }
-      );
+      const errorBody: ApiErrorResponse = { error: 'Keyword is required' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     await db.addSearchHistory(authInfo.username, keyword);
 
     // 再次获取最新列表，确保客户端与服务端同步
     const history = await db.getSearchHistory(authInfo.username);
-    return NextResponse.json(history.slice(0, HISTORY_LIMIT), { status: 200 });
+    const responseBody: SearchHistoryApiResponse = history.slice(
+      0,
+      HISTORY_LIMIT
+    );
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (err) {
     console.error('添加搜索历史失败', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = { error: 'Internal Server Error' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }
 
@@ -77,7 +85,8 @@ export async function DELETE(request: NextRequest) {
     // 从 cookie 获取用户信息
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -85,12 +94,11 @@ export async function DELETE(request: NextRequest) {
 
     await db.deleteSearchHistory(authInfo.username, kw || undefined);
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    const responseBody: SuccessResponse = { success: true };
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (err) {
     console.error('删除搜索历史失败', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = { error: 'Internal Server Error' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }

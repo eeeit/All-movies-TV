@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  TvmazeItem,
+  TvmazeResult,
+  TvmazeSearchApiQuery,
+} from '@shared/api-contract';
+
 import { getCacheTime } from '@/lib/config';
-import { TvmazeItem, TvmazeResult } from '@/lib/types';
 interface TvmazeSearchApiResponse {
   score: number;
   show: {
@@ -20,7 +26,7 @@ interface TvmazeSearchApiResponse {
   };
 }
 
-async function fetchTvmazeSearch(query: string) {
+async function fetchTvmazeSearch(query: TvmazeSearchApiQuery['q']) {
   const target = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(
     query
   )}`;
@@ -38,7 +44,8 @@ export async function GET(request: Request) {
   const query = searchParams.get('q')?.trim();
 
   if (!query) {
-    return NextResponse.json({ error: 'q 参数不能为空' }, { status: 400 });
+    const errorResponse: ApiErrorResponse = { error: 'q 参数不能为空' };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   try {

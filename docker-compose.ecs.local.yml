@@ -1,0 +1,32 @@
+name: moontv-local
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: moontv:ecs-local
+    container_name: moontv-app
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${APP_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      PASSWORD: ${PASSWORD}
+      NEXT_PUBLIC_STORAGE_TYPE: localstorage
+      NEXT_PUBLIC_SEARCH_MAX_PAGE: ${NEXT_PUBLIC_SEARCH_MAX_PAGE:-5}
+      NEXT_PUBLIC_IMAGE_PROXY: ${NEXT_PUBLIC_IMAGE_PROXY:-}
+      SITE_NAME: ${SITE_NAME:-}
+      ANNOUNCEMENT: ${ANNOUNCEMENT:-}
+    volumes:
+      - ./config.json:/app/config.json:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- http://127.0.0.1:3000/login >/dev/null 2>&1 || exit 1',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s

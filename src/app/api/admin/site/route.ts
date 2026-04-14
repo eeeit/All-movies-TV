@@ -2,26 +2,31 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  AdminSiteApiRequest,
+  ApiErrorResponse,
+  AuthSuccessResponse,
+} from '@shared/api-contract';
+
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
 import { getStorage } from '@/lib/db';
 export async function POST(request: NextRequest) {
   const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
   if (storageType === 'localstorage') {
-    return NextResponse.json(
-      {
-        error: '不支持本地存储进行管理员配置',
-      },
-      { status: 400 }
-    );
+    const errorBody: ApiErrorResponse = {
+      error: '不支持本地存储进行管理员配置',
+    };
+    return NextResponse.json(errorBody, { status: 400 });
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as AdminSiteApiRequest;
 
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
     const username = authInfo.username;
 
@@ -31,13 +36,7 @@ export async function POST(request: NextRequest) {
       SearchDownstreamMaxPage,
       SiteInterfaceCacheTime,
       ImageProxy,
-    } = body as {
-      SiteName: string;
-      Announcement: string;
-      SearchDownstreamMaxPage: number;
-      SiteInterfaceCacheTime: number;
-      ImageProxy: string;
-    };
+    } = body;
 
     // 参数校验
     if (
@@ -47,7 +46,8 @@ export async function POST(request: NextRequest) {
       typeof SiteInterfaceCacheTime !== 'number' ||
       typeof ImageProxy !== 'string'
     ) {
-      return NextResponse.json({ error: '参数格式错误' }, { status: 400 });
+      const errorBody: ApiErrorResponse = { error: '参数格式错误' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     const adminConfig = await getConfig();
@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
         (u) => u.username === username
       );
       if (!user || user.role !== 'admin') {
-        return NextResponse.json({ error: '权限不足' }, { status: 401 });
+        const errorBody: ApiErrorResponse = { error: '权限不足' };
+        return NextResponse.json(errorBody, { status: 401 });
       }
     }
 
@@ -78,22 +79,18 @@ export async function POST(request: NextRequest) {
       await (storage as any).setAdminConfig(adminConfig);
     }
 
-    return NextResponse.json(
-      { ok: true },
-      {
-        headers: {
-          'Cache-Control': 'no-store', // 不缓存结果
-        },
-      }
-    );
+    const responseBody: AuthSuccessResponse = { ok: true };
+    return NextResponse.json(responseBody, {
+      headers: {
+        'Cache-Control': 'no-store', // 不缓存结果
+      },
+    });
   } catch (error) {
     console.error('更新站点配置失败:', error);
-    return NextResponse.json(
-      {
-        error: '更新站点配置失败',
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = {
+      error: '更新站点配置失败',
+      details: (error as Error).message,
+    };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }

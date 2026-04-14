@@ -2,6 +2,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  PlayRecordMutationApiRequest,
+  PlayRecordsApiResponse,
+  SuccessResponse,
+} from '@shared/api-contract';
+
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { PlayRecord } from '@/lib/types';
@@ -10,17 +17,17 @@ export async function GET(request: NextRequest) {
     // 从 cookie 获取用户信息
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
 
     const records = await db.getAllPlayRecords(authInfo.username);
-    return NextResponse.json(records, { status: 200 });
+    const responseBody: PlayRecordsApiResponse = records;
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (err) {
     console.error('获取播放记录失败', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = { error: 'Internal Server Error' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }
 
@@ -29,34 +36,31 @@ export async function POST(request: NextRequest) {
     // 从 cookie 获取用户信息
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
 
-    const body = await request.json();
-    const { key, record }: { key: string; record: PlayRecord } = body;
+    const body = (await request.json()) as PlayRecordMutationApiRequest;
+    const { key, record } = body;
 
     if (!key || !record) {
-      return NextResponse.json(
-        { error: 'Missing key or record' },
-        { status: 400 }
-      );
+      const errorBody: ApiErrorResponse = {
+        error: 'Missing key or record',
+      };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     // 验证播放记录数据
     if (!record.title || !record.source_name || record.index < 1) {
-      return NextResponse.json(
-        { error: 'Invalid record data' },
-        { status: 400 }
-      );
+      const errorBody: ApiErrorResponse = { error: 'Invalid record data' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     // 从key中解析source和id
     const [source, id] = key.split('+');
     if (!source || !id) {
-      return NextResponse.json(
-        { error: 'Invalid key format' },
-        { status: 400 }
-      );
+      const errorBody: ApiErrorResponse = { error: 'Invalid key format' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     const finalRecord = {
@@ -66,13 +70,12 @@ export async function POST(request: NextRequest) {
 
     await db.savePlayRecord(authInfo.username, source, id, finalRecord);
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    const responseBody: SuccessResponse = { success: true };
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (err) {
     console.error('保存播放记录失败', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = { error: 'Internal Server Error' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }
 
@@ -81,7 +84,8 @@ export async function DELETE(request: NextRequest) {
     // 从 cookie 获取用户信息
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
 
     const username = authInfo.username;
@@ -92,10 +96,8 @@ export async function DELETE(request: NextRequest) {
       // 如果提供了 key，删除单条播放记录
       const [source, id] = key.split('+');
       if (!source || !id) {
-        return NextResponse.json(
-          { error: 'Invalid key format' },
-          { status: 400 }
-        );
+        const errorBody: ApiErrorResponse = { error: 'Invalid key format' };
+        return NextResponse.json(errorBody, { status: 400 });
       }
 
       await db.deletePlayRecord(username, source, id);
@@ -111,12 +113,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    const responseBody: SuccessResponse = { success: true };
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (err) {
     console.error('删除播放记录失败', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = { error: 'Internal Server Error' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }

@@ -38,6 +38,7 @@
 
 - [技术栈](#技术栈)
 - [部署](#部署)
+- [ECS 部署](#ecs-部署)
 - [Docker Compose 最佳实践](#Docker-Compose-最佳实践)
 - [环境变量](#环境变量)
 - [配置说明](#配置说明)
@@ -61,7 +62,7 @@
 
 ## 部署
 
-本项目**支持 Vercel、Docker 和 Cloudflare** 部署。
+本项目**支持 Vercel、Docker、ECS 和 Cloudflare** 部署。
 
 存储支持矩阵
 
@@ -77,6 +78,19 @@
 ☑️：理论上支持，未测试
 
 除 localstorage 方式外，其他方式都支持多账户、记录同步和管理页面
+
+### ECS 部署
+
+如果你准备迁移到云服务器 ECS，最省钱的组合是单机 Docker + localstorage；如果你需要多账户同步，再切到单机 Docker + Redis。当前文档示例按 Amazon Linux 2023 编写。
+
+- 最低成本单机方案见 [docker-compose.ecs.local.yml](docker-compose.ecs.local.yml)
+- 最低成本环境变量示例见 [.env.ecs.local.example](.env.ecs.local.example)
+- 多账户同步方案见 [docker-compose.ecs.yml](docker-compose.ecs.yml)
+- Redis 方案环境变量示例见 [.env.ecs.example](.env.ecs.example)
+- Nginx 反向代理示例见 [deploy/nginx/moontv.conf](deploy/nginx/moontv.conf)
+- 完整步骤见 [docs/ecs-deploy.md](docs/ecs-deploy.md)
+
+说明：Cloudflare D1 绑定无法直接迁移到 ECS，迁移到云主机时建议将 `NEXT_PUBLIC_STORAGE_TYPE` 切换为 `redis` 或 `localstorage`。
 
 ### Vercel 部署
 

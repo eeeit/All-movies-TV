@@ -2,12 +2,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  AdminSourceApiRequest,
+  ApiErrorResponse,
+  AuthSuccessResponse,
+} from '@shared/api-contract';
+
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
 import { getStorage } from '@/lib/db';
 import { IStorage } from '@/lib/types';
 // 支持的操作类型
-type Action = 'add' | 'disable' | 'enable' | 'delete' | 'sort';
+type Action = AdminSourceApiRequest['action'];
 
 interface BaseBody {
   action?: Action;
@@ -25,19 +31,21 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json()) as BaseBody & Record<string, any>;
+    const body = (await request.json()) as AdminSourceApiRequest;
     const { action } = body;
 
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
     const username = authInfo.username;
 
     // 基础校验
     const ACTIONS: Action[] = ['add', 'disable', 'enable', 'delete', 'sort'];
     if (!username || !action || !ACTIONS.includes(action)) {
-      return NextResponse.json({ error: '参数格式错误' }, { status: 400 });
+      const errorBody: ApiErrorResponse = { error: '参数格式错误' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     // 获取配置与存储
@@ -50,23 +58,24 @@ export async function POST(request: NextRequest) {
         (u) => u.username === username
       );
       if (!userEntry || userEntry.role !== 'admin') {
-        return NextResponse.json({ error: '权限不足' }, { status: 401 });
+        const errorBody: ApiErrorResponse = { error: '权限不足' };
+        return NextResponse.json(errorBody, { status: 401 });
       }
     }
 
     switch (action) {
       case 'add': {
-        const { key, name, api, detail } = body as {
-          key?: string;
-          name?: string;
-          api?: string;
-          detail?: string;
-        };
+        const { key, name, api, detail } = body as Extract<
+          AdminSourceApiRequest,
+          { action: 'add' }
+        >;
         if (!key || !name || !api) {
-          return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
+          const errorBody: ApiErrorResponse = { error: '缺少必要参数' };
+          return NextResponse.json(errorBody, { status: 400 });
         }
         if (adminConfig.SourceConfig.some((s) => s.key === key)) {
-          return NextResponse.json({ error: '该源已存在' }, { status: 400 });
+          const errorBody: ApiErrorResponse = { error: '该源已存在' };
+          return NextResponse.json(errorBody, { status: 400 });
         }
         adminConfig.SourceConfig.push({
           key,
@@ -79,46 +88,74 @@ export async function POST(request: NextRequest) {
         break;
       }
       case 'disable': {
-        const { key } = body as { key?: string };
+        const { key } = body as Extract<
+          AdminSourceApiRequest,
+          { action: 'disable' }
+        >;
         if (!key)
-          return NextResponse.json({ error: '缺少 key 参数' }, { status: 400 });
+          return NextResponse.json(
+            { error: '缺少 key 参数' } as ApiErrorResponse,
+            { status: 400 }
+          );
         const entry = adminConfig.SourceConfig.find((s) => s.key === key);
         if (!entry)
-          return NextResponse.json({ error: '源不存在' }, { status: 404 });
+          return NextResponse.json({ error: '源不存在' } as ApiErrorResponse, {
+            status: 404,
+          });
         entry.disabled = true;
         break;
       }
       case 'enable': {
-        const { key } = body as { key?: string };
+        const { key } = body as Extract<
+          AdminSourceApiRequest,
+          { action: 'enable' }
+        >;
         if (!key)
-          return NextResponse.json({ error: '缺少 key 参数' }, { status: 400 });
+          return NextResponse.json(
+            { error: '缺少 key 参数' } as ApiErrorResponse,
+            { status: 400 }
+          );
         const entry = adminConfig.SourceConfig.find((s) => s.key === key);
         if (!entry)
-          return NextResponse.json({ error: '源不存在' }, { status: 404 });
+          return NextResponse.json({ error: '源不存在' } as ApiErrorResponse, {
+            status: 404,
+          });
         entry.disabled = false;
         break;
       }
       case 'delete': {
-        const { key } = body as { key?: string };
+        const { key } = body as Extract<
+          AdminSourceApiRequest,
+          { action: 'delete' }
+        >;
         if (!key)
-          return NextResponse.json({ error: '缺少 key 参数' }, { status: 400 });
+          return NextResponse.json(
+            { error: '缺少 key 参数' } as ApiErrorResponse,
+            { status: 400 }
+          );
         const idx = adminConfig.SourceConfig.findIndex((s) => s.key === key);
         if (idx === -1)
-          return NextResponse.json({ error: '源不存在' }, { status: 404 });
+          return NextResponse.json({ error: '源不存在' } as ApiErrorResponse, {
+            status: 404,
+          });
         const entry = adminConfig.SourceConfig[idx];
         if (entry.from === 'config') {
-          return NextResponse.json({ error: '该源不可删除' }, { status: 400 });
+          return NextResponse.json(
+            { error: '该源不可删除' } as ApiErrorResponse,
+            { status: 400 }
+          );
         }
         adminConfig.SourceConfig.splice(idx, 1);
         break;
       }
       case 'sort': {
-        const { order } = body as { order?: string[] };
+        const { order } = body as Extract<
+          AdminSourceApiRequest,
+          { action: 'sort' }
+        >;
         if (!Array.isArray(order)) {
-          return NextResponse.json(
-            { error: '排序列表格式错误' },
-            { status: 400 }
-          );
+          const errorBody: ApiErrorResponse = { error: '排序列表格式错误' };
+          return NextResponse.json(errorBody, { status: 400 });
         }
         const map = new Map(adminConfig.SourceConfig.map((s) => [s.key, s]));
         const newList: typeof adminConfig.SourceConfig = [];
@@ -137,7 +174,9 @@ export async function POST(request: NextRequest) {
         break;
       }
       default:
-        return NextResponse.json({ error: '未知操作' }, { status: 400 });
+        return NextResponse.json({ error: '未知操作' } as ApiErrorResponse, {
+          status: 400,
+        });
     }
 
     // 持久化到存储
@@ -145,22 +184,18 @@ export async function POST(request: NextRequest) {
       await (storage as any).setAdminConfig(adminConfig);
     }
 
-    return NextResponse.json(
-      { ok: true },
-      {
-        headers: {
-          'Cache-Control': 'no-store',
-        },
-      }
-    );
+    const responseBody: AuthSuccessResponse = { ok: true };
+    return NextResponse.json(responseBody, {
+      headers: {
+        'Cache-Control': 'no-store',
+      },
+    });
   } catch (error) {
     console.error('视频源管理操作失败:', error);
-    return NextResponse.json(
-      {
-        error: '视频源管理操作失败',
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = {
+      error: '视频源管理操作失败',
+      details: (error as Error).message,
+    };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }

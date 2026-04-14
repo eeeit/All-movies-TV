@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  DoubanCategoriesApiQuery,
+  DoubanItem,
+  DoubanResult,
+} from '@shared/api-contract';
+
 import { getCacheTime } from '@/lib/config';
-import { DoubanItem, DoubanResult } from '@/lib/types';
 
 interface DoubanCategoryApiResponse {
   total: number;
@@ -57,7 +63,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
   // 获取参数
-  const kind = searchParams.get('kind') || 'movie';
+  const kind = (searchParams.get('kind') ||
+    'movie') as DoubanCategoriesApiQuery['kind'];
   const category = searchParams.get('category');
   const type = searchParams.get('type');
   const pageLimit = parseInt(searchParams.get('limit') || '20');
@@ -65,31 +72,31 @@ export async function GET(request: Request) {
 
   // 验证参数
   if (!kind || !category || !type) {
-    return NextResponse.json(
-      { error: '缺少必要参数: kind 或 category 或 type' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: '缺少必要参数: kind 或 category 或 type',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   if (!['tv', 'movie'].includes(kind)) {
-    return NextResponse.json(
-      { error: 'kind 参数必须是 tv 或 movie' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: 'kind 参数必须是 tv 或 movie',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   if (pageLimit < 1 || pageLimit > 100) {
-    return NextResponse.json(
-      { error: 'pageSize 必须在 1-100 之间' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: 'pageSize 必须在 1-100 之间',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   if (pageStart < 0) {
-    return NextResponse.json(
-      { error: 'pageStart 不能小于 0' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: 'pageStart 不能小于 0',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   const target = `https://m.douban.com/rexxar/api/v2/subject/recent_hot/${kind}?start=${pageStart}&limit=${pageLimit}&category=${category}&type=${type}`;
@@ -120,9 +127,10 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: '获取豆瓣数据失败', details: (error as Error).message },
-      { status: 500 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: '获取豆瓣数据失败',
+      details: (error as Error).message,
+    };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }

@@ -1,25 +1,57 @@
 import { NextRequest } from 'next/server';
 
-// 从cookie获取认证信息 (服务端使用)
-export function getAuthInfoFromCookie(request: NextRequest): {
-  password?: string;
-  username?: string;
-  signature?: string;
-  timestamp?: number;
-} | null {
-  const authCookie = request.cookies.get('auth');
+import { AUTH_HEADER_NAME, type AuthPayload } from '@shared/api-contract';
 
+function parseAuthPayload(value: string): AuthPayload | null {
+  const attempts = [value];
+
+  try {
+    const decoded = decodeURIComponent(value);
+    attempts.push(decoded);
+
+    if (decoded.includes('%')) {
+      attempts.push(decodeURIComponent(decoded));
+    }
+  } catch {
+    // ignore malformed URI sequences and fall back to raw JSON parsing
+  }
+
+  for (const candidate of attempts) {
+    try {
+      const authData = JSON.parse(candidate);
+      if (authData && typeof authData === 'object') {
+        return authData as AuthPayload;
+      }
+    } catch {
+      // try next candidate
+    }
+  }
+
+  return null;
+}
+
+export function serializeAuthPayload(authPayload: AuthPayload): string {
+  return encodeURIComponent(JSON.stringify(authPayload));
+}
+
+// 从 header / cookie 获取认证信息 (服务端使用)
+export function getAuthInfoFromCookie(
+  request: NextRequest
+): AuthPayload | null {
+  const authHeader = request.headers.get(AUTH_HEADER_NAME);
+  if (authHeader) {
+    const authFromHeader = parseAuthPayload(authHeader);
+    if (authFromHeader) {
+      return authFromHeader;
+    }
+  }
+
+  const authCookie = request.cookies.get('auth');
   if (!authCookie) {
     return null;
   }
 
-  try {
-    const decoded = decodeURIComponent(authCookie.value);
-    const authData = JSON.parse(decoded);
-    return authData;
-  } catch (error) {
-    return null;
-  }
+  return parseAuthPayload(authCookie.value);
 }
 
 // 从cookie获取认证信息 (客户端使用)

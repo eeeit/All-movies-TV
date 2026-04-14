@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  TraktItem,
+  TraktResult,
+  TraktTrendingApiQuery,
+} from '@shared/api-contract';
+
 import { getCacheTime } from '@/lib/config';
-import { TraktItem, TraktResult } from '@/lib/types';
 interface TraktTrendingApiResponse {
   title?: string;
   year?: number;
@@ -21,7 +27,7 @@ interface TraktTrendingApiResponse {
   };
 }
 
-async function fetchTraktTrending(type: 'movie' | 'show') {
+async function fetchTraktTrending(type: TraktTrendingApiQuery['type']) {
   const clientId = process.env.TRAKT_CLIENT_ID || '';
 
   if (!clientId) {
@@ -48,13 +54,13 @@ async function fetchTraktTrending(type: 'movie' | 'show') {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type');
+  const type = searchParams.get('type') as TraktTrendingApiQuery['type'] | null;
 
   if (type !== 'movie' && type !== 'show') {
-    return NextResponse.json(
-      { error: 'type 参数必须是 movie 或 show' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: 'type 参数必须是 movie 或 show',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   try {

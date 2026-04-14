@@ -2,6 +2,10 @@
 
 import Hls from 'hls.js';
 
+import { apiRoutes } from '@shared/api-contract';
+
+const IMAGE_PROXY_ROUTE_PREFIX = `${apiRoutes.imageProxy}?url=`;
+
 /**
  * 获取图片代理 URL 设置
  */
@@ -28,6 +32,37 @@ export function getImageProxyUrl(): string | null {
     : null;
 }
 
+const AUTO_PROXY_IMAGE_HOSTS = ['doubanio.com', 'healthcareqh.com'];
+
+function parseImageUrl(originalUrl: string): URL | null {
+  try {
+    return new URL(originalUrl);
+  } catch {
+    if (originalUrl.startsWith('//')) {
+      try {
+        return new URL(`https:${originalUrl}`);
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
+  }
+}
+
+function shouldAutoProxyImageUrl(originalUrl: string): boolean {
+  const parsedUrl = parseImageUrl(originalUrl);
+  if (!parsedUrl) {
+    return false;
+  }
+
+  const host = parsedUrl.hostname.toLowerCase();
+
+  return AUTO_PROXY_IMAGE_HOSTS.some(
+    (allowedHost) => host === allowedHost || host.endsWith(`.${allowedHost}`)
+  );
+}
+
 /**
  * 处理图片 URL，如果设置了图片代理则使用代理
  */
@@ -35,7 +70,7 @@ export function processImageUrl(originalUrl: string): string {
   if (!originalUrl) return originalUrl;
 
   // 已经是站内图片代理地址时，直接返回，避免重复包裹
-  if (originalUrl.includes('/api/image-proxy?url=')) {
+  if (originalUrl.includes(IMAGE_PROXY_ROUTE_PREFIX)) {
     return originalUrl;
   }
 
@@ -50,15 +85,9 @@ export function processImageUrl(originalUrl: string): string {
     return `${proxyUrl}${encoded}`;
   }
 
-  // 未显式开启代理时，对易被浏览器拦截的豆瓣图片自动走站内代理
-  try {
-    const parsed = new URL(originalUrl);
-    const host = parsed.hostname.toLowerCase();
-    if (host.endsWith('doubanio.com')) {
-      return `/api/image-proxy?url=${encoded}`;
-    }
-  } catch {
-    // 非绝对 URL 直接返回原值
+  // 未显式开启代理时，对易出证书或跨域问题的图片自动走站内代理
+  if (shouldAutoProxyImageUrl(originalUrl)) {
+    return `${IMAGE_PROXY_ROUTE_PREFIX}${encoded}`;
   }
 
   return originalUrl;

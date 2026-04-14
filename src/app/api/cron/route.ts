@@ -2,9 +2,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  CronApiErrorResponse,
+  CronApiSuccessResponse,
+  SearchResult,
+} from '@shared/api-contract';
+
 import { db } from '@/lib/db';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
-import { SearchResult } from '@/lib/types';
 export async function GET(request: NextRequest) {
   console.log(request.url);
   try {
@@ -12,23 +17,24 @@ export async function GET(request: NextRequest) {
 
     refreshRecordAndFavorites();
 
-    return NextResponse.json({
+    const response: CronApiSuccessResponse = {
       success: true,
       message: 'Cron job executed successfully',
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Cron job failed:', error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Cron job failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+    const response: CronApiErrorResponse = {
+      success: false,
+      message: 'Cron job failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+    };
+
+    return NextResponse.json(response, { status: 500 });
   }
 }
 

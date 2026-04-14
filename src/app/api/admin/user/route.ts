@@ -2,6 +2,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  AdminUserApiRequest,
+  ApiErrorResponse,
+  AuthSuccessResponse,
+} from '@shared/api-contract';
+
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
 import { getStorage } from '@/lib/db';
@@ -16,7 +22,7 @@ const ACTIONS = [
   'setAllowRegister',
   'changePassword',
   'deleteUser',
-] as const;
+] as const satisfies readonly AdminUserApiRequest['action'][];
 
 export async function POST(request: NextRequest) {
   const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
@@ -30,25 +36,23 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as AdminUserApiRequest;
 
     const authInfo = getAuthInfoFromCookie(request);
     if (!authInfo || !authInfo.username) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const errorBody: ApiErrorResponse = { error: 'Unauthorized' };
+      return NextResponse.json(errorBody, { status: 401 });
     }
     const username = authInfo.username;
 
-    const {
-      targetUsername, // 目标用户名
-      targetPassword, // 目标用户密码（仅在添加用户时需要）
-      allowRegister,
-      action,
-    } = body as {
-      targetUsername?: string;
-      targetPassword?: string;
-      allowRegister?: boolean;
-      action?: (typeof ACTIONS)[number];
-    };
+    const { action } = body;
+
+    const targetUsername =
+      'targetUsername' in body ? body.targetUsername : undefined;
+    const targetPassword =
+      'targetPassword' in body ? body.targetPassword : undefined;
+    const allowRegister =
+      'allowRegister' in body ? body.allowRegister : undefined;
 
     if (!action || !ACTIONS.includes(action)) {
       return NextResponse.json({ error: '参数格式错误' }, { status: 400 });
@@ -313,22 +317,18 @@ export async function POST(request: NextRequest) {
       await (storage as any).setAdminConfig(adminConfig);
     }
 
-    return NextResponse.json(
-      { ok: true },
-      {
-        headers: {
-          'Cache-Control': 'no-store', // 管理员配置不缓存
-        },
-      }
-    );
+    const responseBody: AuthSuccessResponse = { ok: true };
+    return NextResponse.json(responseBody, {
+      headers: {
+        'Cache-Control': 'no-store', // 管理员配置不缓存
+      },
+    });
   } catch (error) {
     console.error('用户管理操作失败:', error);
-    return NextResponse.json(
-      {
-        error: '用户管理操作失败',
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
+    const errorBody: ApiErrorResponse = {
+      error: '用户管理操作失败',
+      details: (error as Error).message,
+    };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }

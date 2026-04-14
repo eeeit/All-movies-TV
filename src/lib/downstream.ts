@@ -1,4 +1,6 @@
-import { API_CONFIG, ApiSite, getConfig } from '@/lib/config';
+import type { ApiSite } from '@shared/api-contract';
+
+import { API_CONFIG, getConfig } from '@/lib/config';
 import { SearchResult } from '@/lib/types';
 import { cleanHtmlTags } from '@/lib/utils';
 
@@ -6,6 +8,9 @@ interface ApiSearchItem {
   vod_id: string;
   vod_name: string;
   vod_pic: string;
+  vod_pic_thumb?: string | string[] | null;
+  vod_pic_slide?: string | string[] | null;
+  vod_pic_screenshot?: string | string[] | null;
   vod_remarks?: string;
   vod_play_url?: string;
   vod_class?: string;
@@ -13,6 +18,34 @@ interface ApiSearchItem {
   vod_content?: string;
   vod_douban_id?: number;
   type_name?: string;
+}
+
+function collectApiImageUrls(
+  ...values: Array<string | string[] | null | undefined>
+): string[] {
+  const urls = values.flatMap((value) => {
+    if (!value) return [];
+
+    const rawValue = Array.isArray(value) ? value.join(',') : value;
+    return rawValue.match(/https?:\/\/[^\s,'"]+/g) || [];
+  });
+
+  return Array.from(new Set(urls.map((url) => url.trim()).filter(Boolean)));
+}
+
+function pickApiBackdrop(
+  item: Pick<
+    ApiSearchItem,
+    'vod_pic_thumb' | 'vod_pic_slide' | 'vod_pic_screenshot'
+  >
+): string {
+  return (
+    collectApiImageUrls(
+      item.vod_pic_slide,
+      item.vod_pic_screenshot,
+      item.vod_pic_thumb
+    )[0] || ''
+  );
 }
 
 export async function searchFromApi(
@@ -77,6 +110,7 @@ export async function searchFromApi(
         id: item.vod_id.toString(),
         title: item.vod_name.trim().replace(/\s+/g, ' '),
         poster: item.vod_pic,
+        backdrop: pickApiBackdrop(item) || undefined,
         episodes,
         source: apiSite.key,
         source_name: apiName,
@@ -150,6 +184,7 @@ export async function searchFromApi(
                 id: item.vod_id.toString(),
                 title: item.vod_name.trim().replace(/\s+/g, ' '),
                 poster: item.vod_pic,
+                backdrop: pickApiBackdrop(item) || undefined,
                 episodes,
                 source: apiSite.key,
                 source_name: apiName,
@@ -256,6 +291,7 @@ export async function getDetailFromApi(
     id: id.toString(),
     title: videoDetail.vod_name,
     poster: videoDetail.vod_pic,
+    backdrop: pickApiBackdrop(videoDetail) || undefined,
     episodes,
     source: apiSite.key,
     source_name: apiSite.name,

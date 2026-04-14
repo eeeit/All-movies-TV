@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  OmdbItem,
+  OmdbResult,
+  OmdbSearchApiQuery,
+} from '@shared/api-contract';
+
 import { getCacheTime } from '@/lib/config';
-import { OmdbItem, OmdbResult } from '@/lib/types';
 interface OmdbApiResponse {
   Response: 'True' | 'False';
   Title?: string;
@@ -30,8 +36,8 @@ async function fetchOmdb(url: string): Promise<OmdbApiResponse> {
 }
 
 async function lookupByTitle(
-  query: string,
-  type?: 'movie' | 'series' | 'episode'
+  query: OmdbSearchApiQuery['q'],
+  type?: OmdbSearchApiQuery['type']
 ) {
   const apiKey = process.env.OMDB_API_KEY || '';
   if (!apiKey) {
@@ -75,17 +81,18 @@ async function lookupByTitle(
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q')?.trim();
-  const type = searchParams.get('type');
+  const type = searchParams.get('type') as OmdbSearchApiQuery['type'] | null;
 
   if (!query) {
-    return NextResponse.json({ error: 'q 参数不能为空' }, { status: 400 });
+    const errorResponse: ApiErrorResponse = { error: 'q 参数不能为空' };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   if (type && !['movie', 'series', 'episode'].includes(type)) {
-    return NextResponse.json(
-      { error: 'type 参数必须是 movie、series 或 episode' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: 'type 参数必须是 movie、series 或 episode',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   try {

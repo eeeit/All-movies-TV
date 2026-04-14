@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+
+import type { AuthSuccessResponse } from '@shared/api-contract';
+
 export async function POST() {
-  const response = NextResponse.json({ ok: true });
+  const responseBody: AuthSuccessResponse = { ok: true };
+  const response = NextResponse.json(responseBody);
 
   // 清除认证cookie
   response.cookies.set('auth', '', {

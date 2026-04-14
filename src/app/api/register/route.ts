@@ -1,6 +1,14 @@
 /* eslint-disable no-console,@typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  AuthPayload,
+  AuthSuccessResponse,
+  RegisterApiRequest,
+} from '@shared/api-contract';
+
+import { serializeAuthPayload } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
 import { db } from '@/lib/db';
 // 读取存储类型环境变量，默认 localstorage
@@ -38,9 +46,9 @@ async function generateSignature(
     .join('');
 }
 
-// 生成认证Cookie（带签名）
-async function generateAuthCookie(username: string): Promise<string> {
-  const authData: any = {
+// 生成认证信息
+async function createAuthPayload(username: string): Promise<AuthPayload> {
+  const authData: AuthPayload = {
     username,
     timestamp: Date.now(),
   };
@@ -50,44 +58,52 @@ async function generateAuthCookie(username: string): Promise<string> {
   const signature = await generateSignature(username, signingKey);
   authData.signature = signature;
 
-  return encodeURIComponent(JSON.stringify(authData));
+  return authData;
+}
+
+// 生成认证Cookie（带签名）
+async function generateAuthCookie(username: string): Promise<string> {
+  return serializeAuthPayload(await createAuthPayload(username));
 }
 
 export async function POST(req: NextRequest) {
   try {
     // localstorage 模式下不支持注册
     if (STORAGE_TYPE === 'localstorage') {
-      return NextResponse.json(
-        { error: '当前模式不支持注册' },
-        { status: 400 }
-      );
+      const errorBody: ApiErrorResponse = { error: '当前模式不支持注册' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     const config = await getConfig();
     // 校验是否开放注册
     if (!config.UserConfig.AllowRegister) {
-      return NextResponse.json({ error: '当前未开放注册' }, { status: 400 });
+      const errorBody: ApiErrorResponse = { error: '当前未开放注册' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
-    const { username, password } = await req.json();
+    const { username, password } = (await req.json()) as RegisterApiRequest;
 
     if (!username || typeof username !== 'string') {
-      return NextResponse.json({ error: '用户名不能为空' }, { status: 400 });
+      const errorBody: ApiErrorResponse = { error: '用户名不能为空' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
     if (!password || typeof password !== 'string') {
-      return NextResponse.json({ error: '密码不能为空' }, { status: 400 });
+      const errorBody: ApiErrorResponse = { error: '密码不能为空' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     // 检查是否和管理员重复
     if (username === process.env.USERNAME) {
-      return NextResponse.json({ error: '用户已存在' }, { status: 400 });
+      const errorBody: ApiErrorResponse = { error: '用户已存在' };
+      return NextResponse.json(errorBody, { status: 400 });
     }
 
     try {
       // 检查用户是否已存在
       const exist = await db.checkUserExist(username);
       if (exist) {
-        return NextResponse.json({ error: '用户已存在' }, { status: 400 });
+        const errorBody: ApiErrorResponse = { error: '用户已存在' };
+        return NextResponse.json(errorBody, { status: 400 });
       }
 
       await db.registerUser(username, password);
@@ -100,8 +116,13 @@ export async function POST(req: NextRequest) {
       await db.saveAdminConfig(config);
 
       // 注册成功，设置认证cookie
-      const response = NextResponse.json({ ok: true });
-      const cookieValue = await generateAuthCookie(username);
+      const authPayload = await createAuthPayload(username);
+      const responseBody: AuthSuccessResponse = {
+        ok: true,
+        auth: authPayload,
+      };
+      const response = NextResponse.json(responseBody);
+      const cookieValue = serializeAuthPayload(authPayload);
       const expires = new Date();
       expires.setDate(expires.getDate() + 7); // 7天过期
 
@@ -116,10 +137,12 @@ export async function POST(req: NextRequest) {
       return response;
     } catch (err) {
       console.error('数据库注册失败', err);
-      return NextResponse.json({ error: '数据库错误' }, { status: 500 });
+      const errorBody: ApiErrorResponse = { error: '数据库错误' };
+      return NextResponse.json(errorBody, { status: 500 });
     }
   } catch (error) {
     console.error('注册接口异常', error);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+    const errorBody: ApiErrorResponse = { error: '服务器错误' };
+    return NextResponse.json(errorBody, { status: 500 });
   }
 }

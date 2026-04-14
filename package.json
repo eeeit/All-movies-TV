@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node scripts/convert-config.js && node scripts/generate-manifest.js && next dev -H 0.0.0.0",
     "build": "node scripts/convert-config.js && node scripts/generate-manifest.js && next build",
+    "build:deploy-stage": "node scripts/run-build-deploy-stage.js",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint src --fix && pnpm format",

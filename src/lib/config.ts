@@ -1,16 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, no-console, @typescript-eslint/no-non-null-assertion */
 
+import type { AdminConfig, ApiSite } from '@shared/api-contract';
+
 import { getStorage } from '@/lib/db';
 
-import { AdminConfig } from './admin.types';
 import runtimeConfig from './runtime';
-
-export interface ApiSite {
-  key: string;
-  api: string;
-  name: string;
-  detail?: string;
-}
 
 interface ConfigFileStruct {
   cache_time?: number;

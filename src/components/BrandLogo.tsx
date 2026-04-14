@@ -20,8 +20,8 @@ const BrandLogo = ({
     <Image
       src='/logo_bg.png'
       alt='天下影视 Logo'
-      width={965}
-      height={274}
+      width={939}
+      height={275}
       priority={priority}
       sizes={sizes}
       className={`h-auto w-full ${imageClassName}`.trim()}

@@ -1,0 +1,15 @@
+.git
+.github
+.next
+.wrangler
+.vscode
+coverage
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+*.log
+
+Dockerfile*
+docker-compose*.yml
+
+docs

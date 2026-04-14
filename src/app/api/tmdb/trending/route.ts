@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import type {
+  ApiErrorResponse,
+  TmdbItem,
+  TmdbResult,
+  TmdbTrendingApiQuery,
+} from '@shared/api-contract';
+
 import { getCacheTime } from '@/lib/config';
-import { TmdbItem, TmdbResult } from '@/lib/types';
 
 interface TmdbTrendingApiResponse {
   results: Array<{
@@ -30,7 +36,7 @@ function buildTmdbImageUrl(
   }${imagePath}`;
 }
 
-async function fetchTmdbTrending(type: 'movie' | 'tv') {
+async function fetchTmdbTrending(type: TmdbTrendingApiQuery['type']) {
   const bearerToken =
     process.env.TMDB_ACCESS_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
   const apiKey = process.env.TMDB_API_KEY || '';
@@ -65,13 +71,13 @@ async function fetchTmdbTrending(type: 'movie' | 'tv') {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type');
+  const type = searchParams.get('type') as TmdbTrendingApiQuery['type'] | null;
 
   if (type !== 'movie' && type !== 'tv') {
-    return NextResponse.json(
-      { error: 'type 参数必须是 movie 或 tv' },
-      { status: 400 }
-    );
+    const errorResponse: ApiErrorResponse = {
+      error: 'type 参数必须是 movie 或 tv',
+    };
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
   try {

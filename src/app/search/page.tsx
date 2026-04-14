@@ -103,7 +103,7 @@ function SearchPageClient() {
       'searchHistoryUpdated',
       (newHistory: string[]) => {
         setSearchHistory(newHistory);
-      },
+      }
     );
 
     return unsubscribe;
@@ -127,7 +127,7 @@ function SearchPageClient() {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/search?q=${encodeURIComponent(query.trim())}`,
+        `/api/search?q=${encodeURIComponent(query.trim())}`
       );
       const data = await response.json();
       setSearchResults(
@@ -155,7 +155,7 @@ function SearchPageClient() {
               return parseInt(a.year) > parseInt(b.year) ? -1 : 1;
             }
           }
-        }),
+        })
       );
       setShowResults(true);
     } catch (error) {
@@ -183,6 +183,22 @@ function SearchPageClient() {
     addSearchHistory(trimmed);
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // iOS 某些输入法下，依赖 form submit 可能不稳定，回车时手动兜底触发搜索
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return;
+    e.preventDefault();
+    const trimmed = searchQuery.trim().replace(/\s+/g, ' ');
+    if (!trimmed) return;
+
+    setSearchQuery(trimmed);
+    setIsLoading(true);
+    setShowResults(true);
+
+    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    fetchSearchResults(trimmed);
+    addSearchHistory(trimmed);
+  };
+
   return (
     <PageLayout activePath='/search'>
       <div className='px-4 sm:px-10 py-4 sm:py-8 overflow-visible mb-10'>
@@ -193,12 +209,24 @@ function SearchPageClient() {
               <Search className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500' />
               <input
                 id='searchInput'
-                type='text'
+                type='search'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                enterKeyHint='search'
+                autoCapitalize='none'
+                autoCorrect='off'
+                spellCheck={false}
                 placeholder={t('searchPlaceholder')}
-                className='w-full h-12 rounded-full bg-[#161616] py-3 pl-10 pr-4 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#f0b90b]/40 focus:bg-[#1a1a1a] border border-white/8 shadow-[0_14px_40px_rgba(0,0,0,0.3)]'
+                className='w-full h-12 rounded-full bg-[#161616] py-3 pl-10 pr-12 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#f0b90b]/40 focus:bg-[#1a1a1a] border border-white/8 shadow-[0_14px_40px_rgba(0,0,0,0.3)]'
               />
+              <button
+                type='submit'
+                aria-label={t('search')}
+                className='absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-[#f0b90b]/90 p-2 text-black transition-colors hover:bg-[#f0b90b]'
+              >
+                <Search className='h-4 w-4' />
+              </button>
             </div>
           </form>
         </div>
@@ -309,7 +337,7 @@ function SearchPageClient() {
                       onClick={() => {
                         setSearchQuery(item);
                         router.push(
-                          `/search?q=${encodeURIComponent(item.trim())}`,
+                          `/search?q=${encodeURIComponent(item.trim())}`
                         );
                       }}
                       className='px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-sm text-neutral-300 transition-colors duration-200 border border-white/8 hover:border-[#f0b90b]/20'

@@ -13,6 +13,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Suspense, useEffect, useState } from 'react';
 
 // 客户端收藏 API
@@ -30,6 +31,7 @@ import { getTvmazeShowSearch } from '@/lib/tvmaze.client';
 import {
   DoubanItem,
   OmdbItem,
+  SearchResult,
   TmdbItem,
   TraktItem,
   TvmazeItem,
@@ -41,6 +43,220 @@ import { useLanguage } from '@/components/LanguageProvider';
 import PageLayout from '@/components/PageLayout';
 import { useSite } from '@/components/SiteProvider';
 import VideoCard from '@/components/VideoCard';
+
+type LAAnalyticsWindow = Window & {
+  LA?: {
+    init: (config: { id: string; ck: string }) => void;
+  };
+};
+
+const LA_ANALYTICS_CONFIG = {
+  id: '3Pbo6TXPCgl3AdWS',
+  ck: '3Pbo6TXPCgl3AdWS',
+};
+
+let hasLaAnalyticsInitialized = false;
+
+const HERO_POSTER_SOURCE_PRIORITY = [
+  'dyttzy',
+  'ruyi',
+  'bfzy',
+  'ffzy',
+  'zy360',
+  'wujin',
+  'wolong',
+  'lzi',
+  'mdzy',
+  'jisu',
+];
+
+const HERO_BACKDROP_DETAIL_LOOKUP_LIMIT = 2;
+const HERO_FALLBACK_MOVIE_POOL_LIMIT = 15;
+const HERO_FALLBACK_TV_POOL_LIMIT = 9;
+const HERO_FALLBACK_LOOKUP_LIMIT =
+  HERO_FALLBACK_MOVIE_POOL_LIMIT + HERO_FALLBACK_TV_POOL_LIMIT;
+const HERO_SLIDE_LIMIT = 6;
+const HERO_POSTER_SLICE_POSITIONS = ['16%', '50%', '84%'];
+const HERO_POSTER_SLICE_Y_POSITION = '28%';
+const CURATED_HERO_TITLES = [
+  '拼桌',
+  '密探',
+  '瑞典救援暗线',
+  '危险关系',
+  '家事法庭',
+  '白日提灯',
+];
+
+type HeroVisualAsset = {
+  poster?: string;
+  backdrop?: string;
+};
+
+type HeroSourceItem = DoubanItem | TmdbItem | TraktItem;
+
+function getHighQualityHeroImageUrl(originalUrl: string): string {
+  if (!originalUrl) return originalUrl;
+
+  if (originalUrl.includes('image.tmdb.org/t/p/')) {
+    return originalUrl.replace(/\/t\/p\/(?:w\d+|original)\//, '/t/p/original/');
+  }
+
+  if (originalUrl.includes('doubanio.com/view/photo/')) {
+    return originalUrl
+      .replace('/s_ratio_poster/', '/l_ratio_poster/')
+      .replace('/m_ratio_poster/', '/l_ratio_poster/');
+  }
+
+  if (originalUrl.includes('static.tvmaze.com/uploads/images/')) {
+    return originalUrl
+      .replace('/medium/', '/original_untouched/')
+      .replace('/original/', '/original_untouched/');
+  }
+
+  return originalUrl;
+}
+
+function getOptimizedHeroSliceImageUrl(originalUrl: string): string {
+  if (!originalUrl) return originalUrl;
+
+  if (originalUrl.includes('image.tmdb.org/t/p/')) {
+    return originalUrl.replace(/\/t\/p\/(?:w\d+|original)\//, '/t/p/w780/');
+  }
+
+  if (originalUrl.includes('doubanio.com/view/photo/')) {
+    return originalUrl
+      .replace('/l_ratio_poster/', '/m_ratio_poster/')
+      .replace('/s_ratio_poster/', '/m_ratio_poster/');
+  }
+
+  if (originalUrl.includes('static.tvmaze.com/uploads/images/')) {
+    return originalUrl
+      .replace('/original_untouched/', '/medium/')
+      .replace('/original/', '/medium/');
+  }
+
+  return originalUrl;
+}
+
+function normalizeHeroLookupTitle(title: string): string {
+  return title
+    .replace(/[\s·•:：\-—_]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function isPreviewSearchResult(result: SearchResult): boolean {
+  const rawLabel = `${result.title} ${result.type_name || ''} ${
+    result.class || ''
+  }`;
+  return /(预告|片花|花絮|解说|抢先版)/.test(rawLabel);
+}
+
+function getHeroSearchResultScore(
+  result: SearchResult,
+  title: string,
+  year?: string
+): number {
+  if ((!result.poster && !result.backdrop) || isPreviewSearchResult(result)) {
+    return -1;
+  }
+
+  const normalizedQueryTitle = normalizeHeroLookupTitle(title);
+  const normalizedResultTitle = normalizeHeroLookupTitle(result.title);
+
+  let score = 0;
+
+  if (normalizedResultTitle === normalizedQueryTitle) {
+    score += 100;
+  } else if (
+    normalizedResultTitle.includes(normalizedQueryTitle) ||
+    normalizedQueryTitle.includes(normalizedResultTitle)
+  ) {
+    score += 60;
+  } else {
+    return -1;
+  }
+
+  if (year && result.year === year) {
+    score += 20;
+  }
+
+  if (result.backdrop) {
+    score += 45;
+  }
+
+  if (result.poster) {
+    score += 5;
+  }
+
+  const sourcePriorityIndex = HERO_POSTER_SOURCE_PRIORITY.indexOf(
+    result.source
+  );
+  if (sourcePriorityIndex >= 0) {
+    score += HERO_POSTER_SOURCE_PRIORITY.length - sourcePriorityIndex;
+  }
+
+  return score;
+}
+
+function getRankedHeroSearchResults(
+  results: SearchResult[],
+  title: string,
+  year?: string
+): SearchResult[] {
+  return results
+    .map((result) => ({
+      result,
+      score: getHeroSearchResultScore(result, title, year),
+    }))
+    .filter((entry) => entry.score >= 0)
+    .sort((left, right) => right.score - left.score)
+    .map((entry) => entry.result);
+}
+
+function getHeroSourceItemScore(item: HeroSourceItem): number {
+  let score = 0;
+
+  if ('mediaType' in item) {
+    score += item.backdrop ? 120 : 80;
+    if (item.overview) {
+      score += 15;
+    }
+  } else if ('type' in item) {
+    score += 55;
+    if (item.summary) {
+      score += 10;
+    }
+  } else {
+    score += 35;
+  }
+
+  if (item.poster) {
+    score += 10;
+  }
+
+  return score;
+}
+
+function pickBestHeroSourceByTitle(
+  items: HeroSourceItem[],
+  title: string
+): HeroSourceItem | null {
+  const normalizedTitle = normalizeHeroLookupTitle(title);
+
+  const matches = items.filter(
+    (item) => normalizeHeroLookupTitle(item.title) === normalizedTitle
+  );
+
+  if (matches.length === 0) {
+    return null;
+  }
+
+  return matches.sort(
+    (left, right) =>
+      getHeroSourceItemScore(right) - getHeroSourceItemScore(left)
+  )[0];
+}
 
 function HomeClient() {
   const [activeTab, setActiveTab] = useState<'home' | 'favorites'>('home');
@@ -56,6 +272,9 @@ function HomeClient() {
   const [hotMovies, setHotMovies] = useState<DoubanItem[]>([]);
   const [hotTvShows, setHotTvShows] = useState<DoubanItem[]>([]);
   const [hotVarietyShows, setHotVarietyShows] = useState<DoubanItem[]>([]);
+  const [heroDownstreamAssets, setHeroDownstreamAssets] = useState<
+    Record<string, HeroVisualAsset>
+  >({});
   const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
@@ -256,46 +475,74 @@ function HomeClient() {
     summary?: string;
   };
 
-  // 轮播图优先固定走 TMDb，保证图片来源和质量更稳定
-  const tmdbMovieBackdropHeroes = tmdbMovies.filter((item) => item.backdrop);
-  const tmdbTvBackdropHeroes = tmdbTvShows.filter((item) => item.backdrop);
-  const tmdbMoviePosterFallbacks = tmdbMovies.filter(
-    (item) => !item.backdrop && item.poster
-  );
-  const tmdbTvPosterFallbacks = tmdbTvShows.filter(
-    (item) => !item.backdrop && item.poster
-  );
-  const tmdbHeroSource = [
-    ...tmdbMovieBackdropHeroes.slice(0, 4),
-    ...tmdbTvBackdropHeroes.slice(0, 2),
-    ...tmdbMoviePosterFallbacks.slice(
-      0,
-      Math.max(0, 4 - tmdbMovieBackdropHeroes.length)
-    ),
-    ...tmdbTvPosterFallbacks.slice(
-      0,
-      Math.max(0, 2 - tmdbTvBackdropHeroes.length)
-    ),
-  ];
   const fallbackHeroSource = [
-    ...displayMovies.slice(0, 4),
-    ...displayTvShows.slice(0, 2),
+    ...displayMovies.slice(0, HERO_FALLBACK_MOVIE_POOL_LIMIT),
+    ...displayTvShows.slice(0, HERO_FALLBACK_TV_POOL_LIMIT),
   ];
-  const heroSourceItems =
-    tmdbHeroSource.length > 0 ? tmdbHeroSource : fallbackHeroSource;
+  const curatedHeroPool: HeroSourceItem[] = [
+    ...tmdbMovies,
+    ...tmdbTvShows,
+    ...hotMovies,
+    ...hotTvShows,
+    ...traktMovies,
+    ...traktTvShows,
+  ];
+  const curatedHeroSource = CURATED_HERO_TITLES.map((title) =>
+    pickBestHeroSourceByTitle(curatedHeroPool, title)
+  ).filter(Boolean) as HeroSourceItem[];
+  const heroSourceItems = [
+    ...curatedHeroSource,
+    ...fallbackHeroSource.filter(
+      (item) =>
+        !curatedHeroSource.some(
+          (curatedItem) =>
+            normalizeHeroLookupTitle(curatedItem.title) ===
+            normalizeHeroLookupTitle(item.title)
+        )
+    ),
+  ].slice(0, HERO_SLIDE_LIMIT);
+  const heroLookupTargets = heroSourceItems
+    .filter((item) => !(item as TmdbItem).backdrop)
+    .slice(0, HERO_FALLBACK_LOOKUP_LIMIT)
+    .map((item) => ({
+      title: item.title,
+      year: item.year,
+    }));
+  const shouldLookupDownstreamHeroPosters = heroLookupTargets.length > 0;
+  const heroLookupKey = heroLookupTargets
+    .map((item) => `${item.title}::${item.year || ''}`)
+    .join('|');
 
-  const heroSlides: HeroContent[] = heroSourceItems.map((item) => ({
-    title: item.title,
-    poster: item.poster,
-    backdrop: (item as any).backdrop,
-    overview: (item as any).overview,
-    summary: (item as any).summary,
-  }));
+  const heroSlides: HeroContent[] = heroSourceItems.map((item) => {
+    const downstreamAsset = heroDownstreamAssets[item.title] || {};
+
+    return {
+      title: item.title,
+      poster: downstreamAsset.poster || item.poster,
+      backdrop: (item as any).backdrop || downstreamAsset.backdrop,
+      overview: (item as any).overview,
+      summary: (item as any).summary,
+    };
+  });
 
   const heroItem = heroSlides[heroIndex];
   const heroTitle = heroItem?.title || announcement || t('featuredContent');
-  const heroPoster = heroItem?.backdrop || heroItem?.poster || '';
-  const heroImageUrl = heroPoster ? processImageUrl(heroPoster) : '';
+  const heroBackdropImageUrl = heroItem?.backdrop
+    ? processImageUrl(getHighQualityHeroImageUrl(heroItem.backdrop))
+    : '';
+  const heroPosterImageUrl = heroItem?.poster
+    ? processImageUrl(getHighQualityHeroImageUrl(heroItem.poster))
+    : '';
+  const heroPosterSliceImageUrl = heroItem?.poster
+    ? processImageUrl(getOptimizedHeroSliceImageUrl(heroItem.poster))
+    : heroPosterImageUrl;
+  const heroBackdropSliceImageUrl = heroItem?.backdrop
+    ? processImageUrl(getOptimizedHeroSliceImageUrl(heroItem.backdrop))
+    : '';
+  const heroSliceImageUrl =
+    heroPosterSliceImageUrl || heroBackdropSliceImageUrl;
+  const heroDisplayImageUrl = heroBackdropImageUrl || heroPosterImageUrl;
+  const heroUsesPosterFallback = Boolean(heroSliceImageUrl);
   const heroSummary = heroItem?.overview || heroItem?.summary || '';
 
   const rankingItems = displayMovies
@@ -370,6 +617,128 @@ function HomeClient() {
     if (heroSlides.length <= 1) return;
     setHeroIndex((prev) => (prev + 1) % heroSlides.length);
   };
+
+  useEffect(() => {
+    if (!shouldLookupDownstreamHeroPosters || heroLookupTargets.length === 0) {
+      setHeroDownstreamAssets({});
+      return;
+    }
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    const fetchHeroBackdropFromDetail = async (
+      result: SearchResult
+    ): Promise<HeroVisualAsset> => {
+      if (result.backdrop) {
+        return {
+          poster: result.poster,
+          backdrop: result.backdrop,
+        };
+      }
+
+      const detailResponse = await fetch(
+        `/api/detail?id=${encodeURIComponent(
+          result.id
+        )}&source=${encodeURIComponent(result.source)}`,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      if (!detailResponse.ok) {
+        return {
+          poster: result.poster,
+        };
+      }
+
+      const detailData = (await detailResponse.json()) as SearchResult;
+
+      return {
+        poster: result.poster || detailData.poster,
+        backdrop: detailData.backdrop || result.backdrop,
+      };
+    };
+
+    const fetchHeroAssetsFromDownstream = async () => {
+      const results = await Promise.allSettled(
+        heroLookupTargets.map(async ({ title, year }) => {
+          const response = await fetch(
+            `/api/search?q=${encodeURIComponent(title)}`,
+            {
+              signal: controller.signal,
+            }
+          );
+
+          if (!response.ok) {
+            return null;
+          }
+
+          const data = await response.json();
+          const searchResults = Array.isArray(data.results)
+            ? (data.results as SearchResult[])
+            : [];
+          const rankedMatches = getRankedHeroSearchResults(
+            searchResults,
+            title,
+            year
+          ).slice(0, HERO_BACKDROP_DETAIL_LOOKUP_LIMIT);
+
+          if (rankedMatches.length === 0) {
+            return null;
+          }
+
+          let resolvedAsset: HeroVisualAsset | null = null;
+
+          for (const candidate of rankedMatches) {
+            const nextAsset = await fetchHeroBackdropFromDetail(candidate);
+
+            if (!resolvedAsset && (nextAsset.poster || nextAsset.backdrop)) {
+              resolvedAsset = nextAsset;
+            }
+
+            if (nextAsset.backdrop) {
+              resolvedAsset = nextAsset;
+              break;
+            }
+          }
+
+          if (!resolvedAsset?.poster && !resolvedAsset?.backdrop) {
+            return null;
+          }
+
+          return [title, resolvedAsset] as const;
+        })
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      const nextAssetMap: Record<string, HeroVisualAsset> = {};
+      results.forEach((result) => {
+        if (result.status !== 'fulfilled' || !result.value) {
+          return;
+        }
+
+        const [title, asset] = result.value;
+        nextAssetMap[title] = asset;
+      });
+
+      setHeroDownstreamAssets(nextAssetMap);
+    };
+
+    fetchHeroAssetsFromDownstream().catch((error) => {
+      if ((error as Error).name !== 'AbortError') {
+        console.error('获取轮播视频源横图失败:', error);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [heroLookupKey, shouldLookupDownstreamHeroPosters]);
 
   useEffect(() => {
     if (heroSlides.length === 0) {
@@ -565,85 +934,159 @@ function HomeClient() {
             <div className='px-1 sm:px-4 lg:px-5 pb-10'>
               <div className='grid gap-6 lg:gap-8 xl:gap-10 xl:grid-cols-[minmax(0,1fr)_340px]'>
                 <div className='space-y-7 sm:space-y-8'>
-                  <section className='relative aspect-[16/10] sm:aspect-[21/9] overflow-hidden rounded-[0.75rem] sm:rounded-[0.9rem] border border-white/10 bg-[#141414] shadow-[0_24px_70px_rgba(0,0,0,0.48)]'>
-                    <div className='absolute inset-0'>
-                      {heroPoster ? (
-                        <img
-                          src={heroImageUrl}
-                          alt={heroTitle}
-                          className='h-full w-full object-cover'
-                        />
-                      ) : (
-                        <div className='h-full w-full bg-[radial-gradient(circle_at_18%_18%,_rgba(212,175,55,0.2),_transparent_42%),linear-gradient(120deg,_#0f0f0f,_#1a1a1a)]' />
-                      )}
-                      <div className='absolute inset-0 bg-gradient-to-r from-transparent via-[#0f0f0f]/55 to-[#0f0f0f]/95' />
-                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent' />
-                    </div>
-
-                    <button
-                      type='button'
-                      aria-label='Previous slide'
-                      onClick={goPrevHero}
-                      disabled={heroSlides.length <= 1}
-                      className='absolute left-2.5 sm:left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/25 bg-black/45 p-1.5 sm:p-2.5 text-white/80 transition-colors hover:bg-[#d4af37] hover:text-black'
-                    >
-                      <ChevronLeft className='h-4 w-4 sm:h-5 sm:w-5' />
-                    </button>
-                    <button
-                      type='button'
-                      aria-label='Next slide'
-                      onClick={goNextHero}
-                      disabled={heroSlides.length <= 1}
-                      className='absolute right-2.5 sm:right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/25 bg-black/45 p-1.5 sm:p-2.5 text-white/80 transition-colors hover:bg-[#d4af37] hover:text-black'
-                    >
-                      <ChevronRight className='h-4 w-4 sm:h-5 sm:w-5' />
-                    </button>
-
-                    <div className='relative z-10 flex h-full items-center justify-end p-5 sm:p-8 lg:p-10'>
-                      <div className='max-w-[28rem] text-right'>
-                        <h1 className='text-[1.55rem] font-black leading-tight tracking-tight text-white drop-shadow sm:text-[2.35rem] lg:text-[2.65rem]'>
-                          {heroTitle}
-                        </h1>
-                        {heroSummary ? (
-                          <p className='mt-3 text-[13px] leading-6 text-neutral-300 sm:text-[15px] sm:leading-7'>
-                            {heroSummary}
-                          </p>
-                        ) : null}
+                  <section className='relative overflow-hidden rounded-md bg-black shadow-[0_24px_70px_rgba(0,0,0,0.48)] border-[2px] border-black'>
+                    {/* Top film perforation strip */}
+                    <div className='flex items-center justify-around h-[22px] sm:h-[28px] bg-black px-1 shrink-0'>
+                      {Array.from({ length: 24 }, (_, i) => (
                         <div
-                          className={`${
-                            heroSummary ? 'mt-7' : 'mt-4'
-                          } flex justify-end gap-2.5 sm:gap-3`}
-                        >
-                          <button
-                            className='inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d4af37] to-[#b39028] px-5 py-2.5 text-[13px] font-semibold text-black shadow-[0_14px_32px_rgba(212,175,55,0.3)] transition-transform hover:scale-[1.03] sm:px-7 sm:py-3 sm:text-[15px]'
-                            onClick={() => jumpToSearch(heroTitle)}
-                          >
-                            <PlayCircle className='h-4 w-4 fill-black shrink-0' />
-                            {t('watchNow')}
-                          </button>
-                          <button
-                            className='inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/20 sm:px-7 sm:py-3 sm:text-[15px]'
-                            onClick={() => jumpToSearch(heroTitle)}
-                          >
-                            <Clapperboard className='h-4 w-4 shrink-0' />
-                            {t('details')}
-                          </button>
+                          key={`perf-t-${i}`}
+                          className='w-[12px] h-[13px] sm:w-[15px] sm:h-[16px] rounded-[2px] bg-neutral-400/[.43]'
+                        />
+                      ))}
+                    </div>
+                    <div className='relative aspect-[16/9] sm:aspect-[21/9] overflow-hidden bg-[#141414]'>
+                      <div className='absolute inset-0'>
+                        {heroSliceImageUrl ? (
+                          heroUsesPosterFallback ? (
+                            <>
+                              <div className='absolute inset-0 grid grid-cols-3 gap-x-0 bg-black px-[1px] py-[3px]'>
+                                {HERO_POSTER_SLICE_POSITIONS.map(
+                                  (position, index) => (
+                                    <div
+                                      key={`${position}-${index}`}
+                                      className='relative h-full overflow-hidden rounded-none bg-[#020202] p-[4px] shadow-[0_0_0_1px_rgba(0,0,0,0.95),0_8px_20px_rgba(0,0,0,0.16)]'
+                                    >
+                                      <div className='relative h-full w-full overflow-hidden rounded-none bg-black'>
+                                        <div
+                                          aria-hidden='true'
+                                          className='absolute inset-0 bg-no-repeat opacity-[0.92]'
+                                          style={{
+                                            backgroundImage: `url("${heroSliceImageUrl}")`,
+                                            backgroundPosition: `${position} ${HERO_POSTER_SLICE_Y_POSITION}`,
+                                            backgroundSize: '315% auto',
+                                          }}
+                                        />
+                                        <div className='absolute inset-0 bg-[linear-gradient(180deg,_rgba(8,8,8,0.08),_rgba(8,8,8,0.34)_48%,_rgba(8,8,8,0.62))]' />
+                                      </div>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                              <div className='absolute inset-0 bg-[radial-gradient(circle_at_72%_24%,_rgba(212,175,55,0.22),_transparent_24%),linear-gradient(135deg,_rgba(8,8,8,0.1),_rgba(8,8,8,0.68))]' />
+                            </>
+                          ) : null
+                        ) : (
+                          <div className='h-full w-full bg-[radial-gradient(circle_at_18%_18%,_rgba(212,175,55,0.2),_transparent_42%),linear-gradient(120deg,_#0f0f0f,_#1a1a1a)]' />
+                        )}
+                        <div
+                          className={`absolute inset-0 ${
+                            heroUsesPosterFallback
+                              ? 'bg-gradient-to-r from-black/92 via-black/46 to-black/8 sm:from-black/88 sm:via-black/28 sm:to-black/6'
+                              : 'bg-gradient-to-r from-black/88 via-black/52 to-black/18 sm:from-black/82 sm:via-black/38 sm:to-black/16'
+                          }`}
+                        />
+                        <div
+                          className={`absolute inset-0 ${
+                            heroUsesPosterFallback
+                              ? 'bg-gradient-to-t from-black/88 via-black/22 to-transparent'
+                              : 'bg-gradient-to-t from-black/92 via-black/30 to-transparent'
+                          }`}
+                        />
+                      </div>
+
+                      <div className='relative z-10 flex h-full flex-col justify-end p-4 sm:p-6 lg:p-8'>
+                        <div className='grid items-end gap-4 sm:gap-5 sm:grid-cols-[minmax(0,1fr)_132px] md:grid-cols-[minmax(0,1fr)_152px] lg:grid-cols-[minmax(0,1fr)_190px]'>
+                          <div className='max-w-[34rem]'>
+                            <h1 className='text-[1.5rem] font-black leading-tight tracking-tight text-white drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)] sm:text-[2.05rem] lg:text-[2.45rem]'>
+                              {heroTitle}
+                            </h1>
+                            {heroSummary ? (
+                              <p className='mt-2.5 max-w-[30rem] overflow-hidden text-[12px] leading-5 text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] sm:mt-3 sm:text-[14px] sm:leading-6'>
+                                {heroSummary}
+                              </p>
+                            ) : null}
+                            <div
+                              className={`${
+                                heroSummary ? 'mt-4 sm:mt-5' : 'mt-3'
+                              } flex flex-wrap items-center gap-2.5 sm:gap-3`}
+                            >
+                              <button
+                                className='inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d4af37] to-[#b39028] px-4 py-2.5 text-[13px] font-semibold text-black shadow-[0_14px_32px_rgba(212,175,55,0.3)] transition-transform hover:scale-[1.03] sm:px-6 sm:py-3 sm:text-[15px]'
+                                onClick={() => jumpToSearch(heroTitle)}
+                              >
+                                <PlayCircle className='h-4 w-4 fill-black shrink-0' />
+                                {t('watchNow')}
+                              </button>
+                              <button
+                                className='inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-[13px] font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/18 sm:px-6 sm:py-3 sm:text-[15px]'
+                                onClick={() => jumpToSearch(heroTitle)}
+                              >
+                                <Clapperboard className='h-4 w-4 shrink-0' />
+                                {t('details')}
+                              </button>
+                            </div>
+                          </div>
+
+                          {heroDisplayImageUrl ? (
+                            <div className='hidden sm:flex justify-self-end'>
+                              <div className='relative aspect-[2/3] w-[132px] overflow-hidden rounded-[0.8rem] border border-white/15 bg-black/35 shadow-[0_18px_50px_rgba(0,0,0,0.48)] md:w-[152px] lg:w-[190px]'>
+                                <img
+                                  src={heroDisplayImageUrl}
+                                  alt={heroTitle}
+                                  className='h-full w-full object-cover'
+                                />
+                                <div className='absolute inset-0 ring-1 ring-inset ring-white/10' />
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className='mt-4 flex items-center justify-between gap-3 sm:mt-5'>
+                          <div className='flex items-center gap-1.5 sm:gap-2'>
+                            {heroSlides.map((item, index) => (
+                              <button
+                                key={`${item.title || 'hero'}-${index}`}
+                                type='button'
+                                aria-label={`Hero slide ${index + 1}`}
+                                onClick={() => setHeroIndex(index)}
+                                className={
+                                  index === heroIndex
+                                    ? 'h-1.5 w-8 rounded-full bg-[#d4af37] shadow-[0_0_14px_rgba(212,175,55,0.45)] sm:w-9'
+                                    : 'h-1.5 w-4 rounded-full bg-white/25 transition-colors hover:bg-white/45 sm:w-5'
+                                }
+                              />
+                            ))}
+                          </div>
+
+                          <div className='flex items-center gap-2'>
+                            <button
+                              type='button'
+                              aria-label='Previous slide'
+                              onClick={goPrevHero}
+                              disabled={heroSlides.length <= 1}
+                              className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white/80 backdrop-blur-sm transition-colors hover:bg-[#d4af37] hover:text-black disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10'
+                            >
+                              <ChevronLeft className='h-4 w-4 sm:h-5 sm:w-5' />
+                            </button>
+                            <button
+                              type='button'
+                              aria-label='Next slide'
+                              onClick={goNextHero}
+                              disabled={heroSlides.length <= 1}
+                              className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white/80 backdrop-blur-sm transition-colors hover:bg-[#d4af37] hover:text-black disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10'
+                            >
+                              <ChevronRight className='h-4 w-4 sm:h-5 sm:w-5' />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                    <div className='absolute bottom-3.5 sm:bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-1.5 sm:gap-2'>
-                      {heroSlides.map((item, index) => (
-                        <button
-                          key={`${item.title || 'hero'}-${index}`}
-                          type='button'
-                          aria-label={`Hero slide ${index + 1}`}
-                          onClick={() => setHeroIndex(index)}
-                          className={
-                            index === heroIndex
-                              ? 'h-1.5 w-7 sm:w-8 rounded-full bg-[#d4af37]'
-                              : 'h-1.5 w-1.5 sm:w-2 rounded-full bg-white/40'
-                          }
+                    {/* Bottom film perforation strip */}
+                    <div className='flex items-center justify-around h-[22px] sm:h-[28px] bg-black px-1 shrink-0'>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <div
+                          key={`perf-b-${i}`}
+                          className='w-[12px] h-[13px] sm:w-[15px] sm:h-[16px] rounded-[2px] bg-neutral-400/[.43]'
                         />
                       ))}
                     </div>
@@ -865,7 +1308,7 @@ function HomeClient() {
                   </div>
                 </div>
 
-                <aside className='rounded-[1.4rem] sm:rounded-[1.6rem] border border-white/10 bg-[#1a1a1a]/95 p-4 sm:p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] xl:sticky xl:top-28 xl:max-h-[calc(100vh-130px)] xl:overflow-auto'>
+                <aside className='rounded-[1.02rem] sm:rounded-[1.16rem] border border-white/10 bg-[#1a1a1a]/95 p-4 sm:p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] xl:sticky xl:top-28 xl:max-h-[calc(100vh-130px)] xl:overflow-auto'>
                   <div className='mb-4 sm:mb-5 flex items-center justify-between'>
                     <h2 className='flex items-center gap-2 text-lg sm:text-xl lg:text-[1.35rem] font-bold text-white'>
                       <TrendingUp className='h-5 w-5 text-[#d4af37]' />
@@ -1081,6 +1524,21 @@ function HomeClient() {
 export default function Home() {
   return (
     <Suspense>
+      <Script
+        id='LA_COLLECT'
+        charSet='UTF-8'
+        src='https://sdk.51.la/js-sdk-pro.min.js'
+        strategy='afterInteractive'
+        onReady={() => {
+          if (hasLaAnalyticsInitialized) return;
+
+          const analytics = (window as LAAnalyticsWindow).LA;
+          if (!analytics) return;
+
+          analytics.init(LA_ANALYTICS_CONFIG);
+          hasLaAnalyticsInitialized = true;
+        }}
+      />
       <HomeClient />
     </Suspense>
   );

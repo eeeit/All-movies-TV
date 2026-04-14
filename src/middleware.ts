@@ -2,21 +2,29 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import {
+  applyApiCorsHeaders,
+  createApiPreflightResponse,
+} from '@/lib/api-cors';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (pathname.startsWith('/api') && request.method === 'OPTIONS') {
+    return createApiPreflightResponse(request);
+  }
+
   // 跳过不需要认证的路径
   if (shouldSkipAuth(pathname)) {
-    return NextResponse.next();
+    return applyApiCorsHeaders(request, NextResponse.next());
   }
 
   const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
 
-  // 如果没有设置密码，直接放行
-  if (storageType === 'localstorage' && !process.env.PASSWORD) {
-    return NextResponse.next();
+  // 如果没有配置文件中设置密码，全系统一律公开访问
+  if (!process.env.PASSWORD) {
+    return applyApiCorsHeaders(request, NextResponse.next());
   }
 
   // 从cookie获取认证信息
@@ -31,7 +39,7 @@ export async function middleware(request: NextRequest) {
     if (!authInfo.password || authInfo.password !== process.env.PASSWORD) {
       return handleAuthFailure(request, pathname);
     }
-    return NextResponse.next();
+    return applyApiCorsHeaders(request, NextResponse.next());
   }
 
   // 其他模式：只验证签名
@@ -50,7 +58,7 @@ export async function middleware(request: NextRequest) {
 
     // 签名验证通过即可
     if (isValidSignature) {
-      return NextResponse.next();
+      return applyApiCorsHeaders(request, NextResponse.next());
     }
   }
 
@@ -103,7 +111,10 @@ function handleAuthFailure(
 ): NextResponse {
   // 如果是 API 路由，返回 401 状态码
   if (pathname.startsWith('/api')) {
-    return new NextResponse('Unauthorized', { status: 401 });
+    return applyApiCorsHeaders(
+      request,
+      new NextResponse('Unauthorized', { status: 401 })
+    );
   }
 
   // 否则重定向到登录页面
@@ -127,12 +138,27 @@ function shouldSkipAuth(pathname: string): boolean {
     '/screenshot.png',
   ];
 
-  return skipPaths.some((path) => pathname.startsWith(path));
+  const publicApiPaths = [
+    '/api/login',
+    '/api/register',
+    '/api/logout',
+    '/api/cron',
+    '/api/image-proxy',
+    '/api/server-config',
+  ];
+
+  return (
+    skipPaths.some((path) => pathname.startsWith(path)) ||
+    publicApiPaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`)
+    )
+  );
 }
 
 // 配置middleware匹配规则
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|login|api/login|api/register|api/logout|api/cron|api/server-config).*)',
+    '/api/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|login).*)',
   ],
 };
