@@ -879,18 +879,6 @@ function HomeClient() {
   return (
     <PageLayout>
       <div className='px-1 sm:px-8 lg:px-10 py-3 sm:py-7 overflow-visible'>
-        {/* 顶部 Tab 切换 */}
-        <div className='mb-7 sm:mb-8 flex justify-center'>
-          <CapsuleSwitch
-            options={[
-              { label: t('home'), value: 'home' },
-              { label: t('favorites'), value: 'favorites' },
-            ]}
-            active={activeTab}
-            onChange={(value) => setActiveTab(value as 'home' | 'favorites')}
-          />
-        </div>
-
         <div className='max-w-[1600px] mx-auto'>
           {activeTab === 'favorites' ? (
             // 收藏夹视图
@@ -934,13 +922,13 @@ function HomeClient() {
             <div className='px-1 sm:px-4 lg:px-5 pb-10'>
               <div className='grid gap-6 lg:gap-8 xl:gap-10 xl:grid-cols-[minmax(0,1fr)_340px]'>
                 <div className='space-y-7 sm:space-y-8'>
-                  <section className='relative overflow-hidden rounded-md bg-black shadow-[0_24px_70px_rgba(0,0,0,0.48)] border-[2px] border-black'>
+                  <section className='relative overflow-hidden rounded-md bg-black shadow-[0_24px_70px_rgba(0,0,0,0.48)] border-[2px] border-black -mx-2 sm:-mx-3 lg:-mx-4'>
                     {/* Top film perforation strip */}
-                    <div className='flex items-center justify-around h-[22px] sm:h-[28px] bg-black px-1 shrink-0'>
+                    <div className='flex items-center justify-around h-[14px] sm:h-[28px] bg-black px-1 shrink-0'>
                       {Array.from({ length: 24 }, (_, i) => (
                         <div
                           key={`perf-t-${i}`}
-                          className='w-[12px] h-[13px] sm:w-[15px] sm:h-[16px] rounded-[2px] bg-neutral-400/[.43]'
+                          className='w-[6px] h-[8px] sm:w-[15px] sm:h-[16px] rounded-[2px] bg-neutral-400/[.43]'
                         />
                       ))}
                     </div>
@@ -997,32 +985,31 @@ function HomeClient() {
                       <div className='relative z-10 flex h-full flex-col justify-end p-4 sm:p-6 lg:p-8'>
                         <div className='grid items-end gap-4 sm:gap-5 sm:grid-cols-[minmax(0,1fr)_132px] md:grid-cols-[minmax(0,1fr)_152px] lg:grid-cols-[minmax(0,1fr)_190px]'>
                           <div className='max-w-[34rem]'>
-                            <h1 className='text-[1.5rem] font-black leading-tight tracking-tight text-white drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)] sm:text-[2.05rem] lg:text-[2.45rem]'>
+                            <h1 className='text-[1rem] font-black leading-[1.15] tracking-tight text-white drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)] sm:text-[1.35rem] lg:text-[1.75rem]'>
                               {heroTitle}
                             </h1>
                             {heroSummary ? (
-                              <p className='mt-2.5 max-w-[30rem] overflow-hidden text-[12px] leading-5 text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] sm:mt-3 sm:text-[14px] sm:leading-6'>
+                              <p className='mt-1.5 max-w-[30rem] overflow-hidden text-[10px] leading-[15px] text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:-webkit-line-clamp:3 sm:mt-2 sm:text-[12px] sm:leading-5 lg:text-[13px] lg:leading-6'>
                                 {heroSummary}
                               </p>
                             ) : null}
                             <div
                               className={`${
-                                heroSummary ? 'mt-4 sm:mt-5' : 'mt-3'
-                              } flex flex-wrap items-center gap-2.5 sm:gap-3`}
+                                heroSummary ? 'mt-2.5 sm:mt-4' : 'mt-2'
+                              } flex flex-wrap items-center gap-1.5 sm:gap-3`}
                             >
                               <button
-                                className='inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d4af37] to-[#b39028] px-4 py-2.5 text-[13px] font-semibold text-black shadow-[0_14px_32px_rgba(212,175,55,0.3)] transition-transform hover:scale-[1.03] sm:px-6 sm:py-3 sm:text-[15px]'
+                                className='inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-[#d4af37] to-[#b39028] px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[13px] font-semibold text-black shadow-[0_14px_32px_rgba(212,175,55,0.3)] transition-transform hover:scale-[1.03] lg:px-4 lg:py-2'
                                 onClick={() => jumpToSearch(heroTitle)}
                               >
-                                <PlayCircle className='h-4 w-4 fill-black shrink-0' />
+                                <PlayCircle className='h-[12px] w-[12px] sm:h-[14px] sm:w-[14px] fill-black shrink-0' />
                                 {t('watchNow')}
                               </button>
                               <button
-                                className='inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-[13px] font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/18 sm:px-6 sm:py-3 sm:text-[15px]'
+                                className='inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[13px] font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/18 lg:px-4 lg:py-2'
                                 onClick={() => jumpToSearch(heroTitle)}
                               >
-                                <Clapperboard className='h-4 w-4 shrink-0' />
-                                {t('details')}
+                                <Clapperboard className='h-[12px] w-[12px] sm:h-[14px] sm:w-[14px] shrink-0' />
                               </button>
                             </div>
                           </div>
@@ -1082,11 +1069,11 @@ function HomeClient() {
                       </div>
                     </div>
                     {/* Bottom film perforation strip */}
-                    <div className='flex items-center justify-around h-[22px] sm:h-[28px] bg-black px-1 shrink-0'>
+                    <div className='flex items-center justify-around h-[14px] sm:h-[28px] bg-black px-1 shrink-0'>
                       {Array.from({ length: 24 }, (_, i) => (
                         <div
                           key={`perf-b-${i}`}
-                          className='w-[12px] h-[13px] sm:w-[15px] sm:h-[16px] rounded-[2px] bg-neutral-400/[.43]'
+                          className='w-[6px] h-[8px] sm:w-[15px] sm:h-[16px] rounded-[2px] bg-neutral-400/[.43]'
                         />
                       ))}
                     </div>
@@ -1543,3 +1530,4 @@ export default function Home() {
     </Suspense>
   );
 }
+

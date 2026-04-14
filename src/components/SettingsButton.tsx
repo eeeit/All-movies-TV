@@ -27,7 +27,7 @@ export const SettingsButton: React.FC = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedAggregateSearch = localStorage.getItem(
-        'defaultAggregateSearch',
+        'defaultAggregateSearch'
       );
       if (savedAggregateSearch !== null) {
         setDefaultAggregateSearch(JSON.parse(savedAggregateSearch));
@@ -125,7 +125,7 @@ export const SettingsButton: React.FC = () => {
       localStorage.setItem('doubanProxyUrl', '');
       localStorage.setItem(
         'enableImageProxy',
-        JSON.stringify(!!defaultImageProxy),
+        JSON.stringify(!!defaultImageProxy)
       );
       localStorage.setItem('imageProxyUrl', defaultImageProxy);
     }
@@ -297,7 +297,10 @@ export const SettingsButton: React.FC = () => {
     <>
       <button
         onClick={handleSettingsClick}
-          className='w-8 h-8 sm:w-10 sm:h-10 p-[6px] sm:p-2 rounded-full flex items-center justify-center text-neutral-300 hover:bg-white/5 hover:text-[#f0b90b] transition-colors'
+        className='w-8 h-8 sm:w-10 sm:h-10 p-[6px] sm:p-2 rounded-full flex items-center justify-center text-neutral-300 hover:bg-white/5 hover:text-[#f0b90b] transition-colors'
+      >
+        <Settings className='w-full h-full' />
+      </button>
 
       {/* 使用 Portal 将设置面板渲染到 document.body */}
       {isOpen && mounted && createPortal(settingsPanel, document.body)}
