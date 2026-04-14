@@ -297,11 +297,7 @@ export const SettingsButton: React.FC = () => {
     <>
       <button
         onClick={handleSettingsClick}
-        className='w-10 h-10 p-2 rounded-full flex items-center justify-center text-neutral-300 hover:bg-white/5 hover:text-[#f0b90b] transition-colors'
-        aria-label={t('settings')}
-      >
-        <Settings className='w-full h-full' />
-      </button>
+          className='w-8 h-8 sm:w-10 sm:h-10 p-[6px] sm:p-2 rounded-full flex items-center justify-center text-neutral-300 hover:bg-white/5 hover:text-[#f0b90b] transition-colors'
 
       {/* 使用 Portal 将设置面板渲染到 document.body */}
       {isOpen && mounted && createPortal(settingsPanel, document.body)}

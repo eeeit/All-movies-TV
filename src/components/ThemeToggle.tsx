@@ -29,7 +29,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     // 渲染一个占位符以避免布局偏移
-    return <div className='w-10 h-10' />;
+    return <div className='h-8 w-8 sm:h-10 sm:w-10' />;
   }
 
   const toggleTheme = () => {
@@ -49,7 +49,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className='flex h-10 w-10 items-center justify-center rounded-full p-2 text-neutral-300 transition-colors hover:bg-white/10 hover:text-[#d4af37]'
+      className='flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full p-[6px] sm:p-2 text-neutral-300 transition-colors hover:bg-white/10 hover:text-[#d4af37]'
       aria-label='Toggle theme'
     >
       {resolvedTheme === 'dark' ? (
