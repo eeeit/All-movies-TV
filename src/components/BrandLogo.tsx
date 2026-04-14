@@ -18,7 +18,7 @@ const BrandLogo = ({
 }: BrandLogoProps) => {
   const logoImage = (
     <Image
-      src='/logo_bg.png'
+      src='/logo_transparent.png'
       alt='天下影视 Logo'
       width={939}
       height={275}
