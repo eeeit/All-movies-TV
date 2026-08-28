@@ -47,4 +47,14 @@ sitemap-*.xml
 src/lib/runtime.ts
 public/manifest.json
 deploy_stage/
-moontv-update.tar.gz
+
+# archives
+*.tar.gz
+
+# one-off debug/scratch artifacts
+check.js
+fix.js
+diff.txt
+files.txt
+update-files.txt
+/swt/

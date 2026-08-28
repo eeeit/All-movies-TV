@@ -38,8 +38,7 @@
 
 - [技术栈](#技术栈)
 - [部署](#部署)
-- [ECS 部署](#ecs-部署)
-- [Docker Compose 最佳实践](#Docker-Compose-最佳实践)
+- [前后端解耦方案](#前后端解耦方案)
 - [环境变量](#环境变量)
 - [配置说明](#配置说明)
 - [管理员配置](#管理员配置)
@@ -58,61 +57,39 @@
 | 语言      | TypeScript 4                                                                                          |
 | 播放器    | [ArtPlayer](https://github.com/zhw2590582/ArtPlayer) · [HLS.js](https://github.com/video-dev/hls.js/) |
 | 代码质量  | ESLint · Prettier · Jest                                                                              |
-| 部署      | Docker · Vercel · CloudFlare pages                                                                    |
+| 部署      | Cloudflare Workers（D1）                                                                              |
+
+## 前后端解耦方案
+
+如果你计划把当前项目收敛成“独立前端 + 独立后端 + 共享契约”的结构，可以先阅读 [docs/frontend-backend-decoupling.md](docs/frontend-backend-decoupling.md)。
+
+这份文档基于当前仓库现状编写，包含：
+
+- 当前耦合点判断
+- 推荐目标目录结构
+- 鉴权与 CORS 改造建议
+- 配置拆分方式
+- 分阶段迁移顺序
+- 独立部署建议
 
 ## 部署
 
-本项目**支持 Vercel、Docker、ECS 和 Cloudflare** 部署。
+本项目当前**唯一维护的部署主线是 Cloudflare Workers**（OpenNext + D1 存储）。
 
-存储支持矩阵
+Docker、Vercel、ECS 等历史部署配置已归档至 [archive/deployment/](archive/deployment/)，不再维护。
 
-|               | Docker | Vercel | Cloudflare |
-| :-----------: | :----: | :----: | :--------: |
-| localstorage  |   ✅   |   ✅   |     ✅     |
-|  原生 redis   |   ✅   |        |            |
-| Cloudflare D1 |        |        |     ✅     |
-| Upstash Redis |   ☑️   |   ✅   |     ☑️     |
+存储支持矩阵（当前主线）
+
+|               | Cloudflare |
+| :-----------: | :--------: |
+| localstorage  |     ✅     |
+| Cloudflare D1 |     ✅     |
 
 ✅：经测试支持
 
-☑️：理论上支持，未测试
+D1 方式支持多账户、记录同步和管理页面。
 
-除 localstorage 方式外，其他方式都支持多账户、记录同步和管理页面
-
-### ECS 部署
-
-如果你准备迁移到云服务器 ECS，最省钱的组合是单机 Docker + localstorage；如果你需要多账户同步，再切到单机 Docker + Redis。当前文档示例按 Amazon Linux 2023 编写。
-
-- 最低成本单机方案见 [docker-compose.ecs.local.yml](docker-compose.ecs.local.yml)
-- 最低成本环境变量示例见 [.env.ecs.local.example](.env.ecs.local.example)
-- 多账户同步方案见 [docker-compose.ecs.yml](docker-compose.ecs.yml)
-- Redis 方案环境变量示例见 [.env.ecs.example](.env.ecs.example)
-- Nginx 反向代理示例见 [deploy/nginx/moontv.conf](deploy/nginx/moontv.conf)
-- 完整步骤见 [docs/ecs-deploy.md](docs/ecs-deploy.md)
-
-说明：Cloudflare D1 绑定无法直接迁移到 ECS，迁移到云主机时建议将 `NEXT_PUBLIC_STORAGE_TYPE` 切换为 `redis` 或 `localstorage`。
-
-### Vercel 部署
-
-#### 普通部署（localstorage）
-
-1. **Fork** 本仓库到你的 GitHub 账户。
-2. 登陆 [Vercel](https://vercel.com/)，点击 **Add New → Project**，选择 Fork 后的仓库。
-3. （强烈建议）设置 PASSWORD 环境变量。
-4. 保持默认设置完成首次部署。
-5. 如需自定义 `config.json`，请直接修改 Fork 后仓库中该文件。
-6. 每次 Push 到 `main` 分支将自动触发重新构建。
-
-部署完成后即可通过分配的域名访问，也可以绑定自定义域名。
-
-#### Upstash Redis 支持
-
-0. 完成普通部署并成功访问。
-1. 在 [upstash](https://upstash.com/) 注册账号并新建一个 Redis 实例，名称任意。
-2. 复制新数据库的 **HTTPS ENDPOINT 和 TOKEN**
-3. 返回你的 Vercel 项目，新增环境变量 **UPSTASH_URL 和 UPSTASH_TOKEN**，值为第二步复制的 endpoint 和 token
-4. 设置环境变量 NEXT_PUBLIC_STORAGE_TYPE，值为 **upstash**；设置 USERNAME 和 PASSWORD 作为站长账号
-5. 重试部署
+历史 ECS 部署文档与示例已移至 [archive/deployment/](archive/deployment/)，不再维护。
 
 ### Cloudflare 部署
 
@@ -138,78 +115,7 @@
 4. 设置环境变量 NEXT_PUBLIC_STORAGE_TYPE，值为 **d1**；设置 USERNAME 和 PASSWORD 作为站长账号
 5. 重试部署
 
-### Docker 部署
-
-#### 1. 直接运行（最简单）
-
-```bash
-# 拉取预构建镜像
-docker pull ghcr.io/senshinya/moontv:latest
-
-# 运行容器
-# -d: 后台运行  -p: 映射端口 3000 -> 3000
-docker run -d --name moontv -p 3000:3000 ghcr.io/senshinya/moontv:latest
-```
-
-访问 `http://服务器 IP:3000` 即可。（需自行到服务器控制台放通 `3000` 端口）
-
-## Docker Compose 最佳实践
-
-若你使用 docker compose 部署，以下是一些 compose 示例
-
-### local storage 版本
-
-```yaml
-services:
-  moontv:
-    image: ghcr.io/senshinya/moontv:latest
-    container_name: moontv
-    restart: unless-stopped
-    ports:
-      - '3000:3000'
-    environment:
-      - PASSWORD=your_password
-    # 如需自定义配置，可挂载文件
-    # volumes:
-    #   - ./config.json:/app/config.json:ro
-```
-
-### Redis 版本（推荐，多账户数据隔离，跨设备同步）
-
-```yaml
-services:
-  moontv-core:
-    image: ghcr.io/senshinya/moontv:latest
-    container_name: moontv
-    restart: unless-stopped
-    ports:
-      - '3000:3000'
-    environment:
-      - USERNAME=admin
-      - PASSWORD=admin_password
-      - NEXT_PUBLIC_STORAGE_TYPE=redis
-      - REDIS_URL=redis://moontv-redis:6379
-      - NEXT_PUBLIC_ENABLE_REGISTER=true
-    networks:
-      - moontv-network
-    depends_on:
-      - moontv-redis
-    # 如需自定义配置，可挂载文件
-    # volumes:
-    #   - ./config.json:/app/config.json:ro
-  moontv-redis:
-    image: redis
-    container_name: moontv-redis
-    restart: unless-stopped
-    networks:
-      - moontv-network
-    # 如需持久化
-    # volumes:
-    #   - ./data:/data
-networks:
-  moontv-network:
-    driver: bridge
-```
+Docker 部署与 Docker Compose 示例已移至 [archive/deployment/](archive/deployment/)。
 
 ## 自动同步最近更改
 
