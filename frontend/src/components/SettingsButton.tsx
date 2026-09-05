@@ -27,7 +27,7 @@ export const SettingsButton: React.FC = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedAggregateSearch = localStorage.getItem(
-        'defaultAggregateSearch',
+        'defaultAggregateSearch'
       );
       if (savedAggregateSearch !== null) {
         setDefaultAggregateSearch(JSON.parse(savedAggregateSearch));
@@ -125,7 +125,7 @@ export const SettingsButton: React.FC = () => {
       localStorage.setItem('doubanProxyUrl', '');
       localStorage.setItem(
         'enableImageProxy',
-        JSON.stringify(!!defaultImageProxy),
+        JSON.stringify(!!defaultImageProxy)
       );
       localStorage.setItem('imageProxyUrl', defaultImageProxy);
     }

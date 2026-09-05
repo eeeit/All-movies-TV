@@ -1,10 +1,10 @@
 import { TvmazeResult } from './types';
 
 export async function getTvmazeShowSearch(
-  query: string,
+  query: string
 ): Promise<TvmazeResult> {
   const response = await fetch(
-    `/api/tvmaze/search?q=${encodeURIComponent(query)}`,
+    `/api/tvmaze/search?q=${encodeURIComponent(query)}`
   );
 
   if (!response.ok) {

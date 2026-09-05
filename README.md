@@ -23,7 +23,7 @@
 - 🔍 **多源聚合搜索**：内置数十个免费资源站点，一次搜索立刻返回全源结果。
 - 📄 **丰富详情页**：支持剧集列表、演员、年份、简介等完整信息展示。
 - ▶️ **流畅在线播放**：集成 HLS.js & ArtPlayer。
-- ❤️ **收藏 + 继续观看**：支持 Redis/D1 存储，多端同步进度。
+- ❤️ **收藏 + 继续观看**：支持 Redis 存储，多端同步进度。
 - 📱 **PWA**：离线缓存、安装到桌面/主屏，移动端原生体验。
 - 🌗 **响应式布局**：桌面侧边栏 + 移动底部导航，自适应各种屏幕尺寸。
 - 🚀 **极简部署**：一条 Docker 命令即可将完整服务跑起来，或免费部署到 Vercel 和 Cloudflare。
@@ -57,7 +57,7 @@
 | 语言      | TypeScript 4                                                                                          |
 | 播放器    | [ArtPlayer](https://github.com/zhw2590582/ArtPlayer) · [HLS.js](https://github.com/video-dev/hls.js/) |
 | 代码质量  | ESLint · Prettier · Jest                                                                              |
-| 部署      | Cloudflare Workers（D1）                                                                              |
+| 部署      | Docker · 云主机 / ECS                                                                                 |
 
 ## 前后端解耦方案
 
@@ -74,48 +74,37 @@
 
 ## 部署
 
-本项目当前**唯一维护的部署主线是 Cloudflare Workers**（OpenNext + D1 存储）。
+本项目当前**唯一维护的部署主线是 Docker + 云主机 / ECS**（Docker Compose + 可选 Redis 存储 + Nginx 反向代理）。完整的服务器准备、部署、更新、排障步骤见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
-Docker、Vercel、ECS 等历史部署配置已归档至 [archive/deployment/](archive/deployment/)，不再维护。
+Cloudflare Workers、Vercel 等历史部署配置已归档至 [archive/deployment/](archive/deployment/)，不再维护。
 
 存储支持矩阵（当前主线）
 
-|               | Cloudflare |
-| :-----------: | :--------: |
-| localstorage  |     ✅     |
-| Cloudflare D1 |     ✅     |
+|              | 云主机 / Docker |
+| :----------: | :-------------: |
+| localstorage |       ✅        |
+|    redis     |       ✅        |
 
 ✅：经测试支持
 
-D1 方式支持多账户、记录同步和管理页面。
+redis 方式支持多账户、记录同步和管理页面。`upstash` 仍保留在代码中，但不在当前部署文档覆盖范围内；`d1`（Cloudflare D1）存储实现已随 Cloudflare 部署一起移除。
 
-历史 ECS 部署文档与示例已移至 [archive/deployment/](archive/deployment/)，不再维护。
+### 快速开始
 
-### Cloudflare 部署
+```bash
+git clone <your-repo-url>
+cd moontv
 
-**Cloudflare Pages 的环境变量尽量设置为密钥而非文本**
+# 方案一：最省成本，无服务端同步
+cp .env.local.example .env.local
+docker compose --env-file .env.local -f docker-compose.local.yml up -d --build
 
-#### 普通部署（localstorage）
+# 方案二：Redis，支持多账户与后台管理
+cp .env.example .env
+docker compose --env-file .env -f docker-compose.yml up -d --build
+```
 
-1. **Fork** 本仓库到你的 GitHub 账户。
-2. 登陆 [Cloudflare](https://cloudflare.com)，点击 **计算（Workers）-> Workers 和 Pages**，点击创建
-3. 选择 Pages，导入现有的 Git 存储库，选择 Fork 后的仓库
-4. 构建命令填写 **pnpm install --frozen-lockfile && pnpm run pages:build**，预设框架为无，构建输出目录为 `.vercel/output/static`
-5. 保持默认设置完成首次部署。进入设置，将兼容性标志设置为 `nodejs_compat`
-6. （强烈建议）首次部署完成后进入设置，新增 PASSWORD 密钥（变量和机密下），而后重试部署。
-7. 如需自定义 `config.json`，请直接修改 Fork 后仓库中该文件。
-8. 每次 Push 到 `main` 分支将自动触发重新构建。
-
-#### D1 支持
-
-0. 完成普通部署并成功访问
-1. 点击 **存储和数据库 -> D1 SQL 数据库**，创建一个新的数据库，名称随意
-2. 进入刚创建的数据库，点击左上角的 Explore Data，将[D1 初始化](D1初始化.md) 中的内容粘贴到 Query 窗口后点击 **Run All**，等待运行完成
-3. 返回你的 pages 项目，进入 **设置 -> 绑定**，添加绑定 D1 数据库，选择你刚创建的数据库，变量名称填 **DB**
-4. 设置环境变量 NEXT_PUBLIC_STORAGE_TYPE，值为 **d1**；设置 USERNAME 和 PASSWORD 作为站长账号
-5. 重试部署
-
-Docker 部署与 Docker Compose 示例已移至 [archive/deployment/](archive/deployment/)。
+更多细节（Nginx 反代、HTTPS、更新发布、排障）见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
 ## 自动同步最近更改
 
@@ -125,19 +114,19 @@ Docker 部署与 Docker Compose 示例已移至 [archive/deployment/](archive/de
 
 ## 环境变量
 
-| 变量                        | 说明                                                        | 可选值                           | 默认值                                                                                                                     |
-| --------------------------- | ----------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| USERNAME                    | redis 部署时的管理员账号                                    | 任意字符串                       | （空）                                                                                                                     |
-| PASSWORD                    | 默认部署时为唯一访问密码，redis 部署时为管理员密码          | 任意字符串                       | （空）                                                                                                                     |
-| SITE_NAME                   | 站点名称                                                    | 任意字符串                       | 天下影视                                                                                                                   |
-| ANNOUNCEMENT                | 站点公告                                                    | 任意字符串                       | 本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。 |
-| NEXT_PUBLIC_STORAGE_TYPE    | 播放记录/收藏的存储方式                                     | localstorage、redis、d1、upstash | localstorage                                                                                                               |
-| REDIS_URL                   | redis 连接 url，若 NEXT_PUBLIC_STORAGE_TYPE 为 redis 则必填 | 连接 url                         | 空                                                                                                                         |
-| UPSTASH_URL                 | upstash redis 连接 url                                      | 连接 url                         | 空                                                                                                                         |
-| UPSTASH_TOKEN               | upstash redis 连接 token                                    | 连接 token                       | 空                                                                                                                         |
-| NEXT_PUBLIC_ENABLE_REGISTER | 是否开放注册，仅在非 localstorage 部署时生效                | true / false                     | false                                                                                                                      |
-| NEXT_PUBLIC_SEARCH_MAX_PAGE | 搜索接口可拉取的最大页数                                    | 1-50                             | 5                                                                                                                          |
-| NEXT_PUBLIC_IMAGE_PROXY     | 默认的浏览器端图片代理                                      | url prefix                       | (空)                                                                                                                       |
+| 变量                        | 说明                                                        | 可选值                       | 默认值                                                                                                                     |
+| --------------------------- | ----------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| USERNAME                    | redis 部署时的管理员账号                                    | 任意字符串                   | （空）                                                                                                                     |
+| PASSWORD                    | 默认部署时为唯一访问密码，redis 部署时为管理员密码          | 任意字符串                   | （空）                                                                                                                     |
+| SITE_NAME                   | 站点名称                                                    | 任意字符串                   | 天下影视                                                                                                                   |
+| ANNOUNCEMENT                | 站点公告                                                    | 任意字符串                   | 本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。 |
+| NEXT_PUBLIC_STORAGE_TYPE    | 播放记录/收藏的存储方式                                     | localstorage、redis、upstash | localstorage                                                                                                               |
+| REDIS_URL                   | redis 连接 url，若 NEXT_PUBLIC_STORAGE_TYPE 为 redis 则必填 | 连接 url                     | 空                                                                                                                         |
+| UPSTASH_URL                 | upstash redis 连接 url                                      | 连接 url                     | 空                                                                                                                         |
+| UPSTASH_TOKEN               | upstash redis 连接 token                                    | 连接 token                   | 空                                                                                                                         |
+| NEXT_PUBLIC_ENABLE_REGISTER | 是否开放注册，仅在非 localstorage 部署时生效                | true / false                 | false                                                                                                                      |
+| NEXT_PUBLIC_SEARCH_MAX_PAGE | 搜索接口可拉取的最大页数                                    | 1-50                         | 5                                                                                                                          |
+| NEXT_PUBLIC_IMAGE_PROXY     | 默认的浏览器端图片代理                                      | url prefix                   | (空)                                                                                                                       |
 
 ## 配置说明
 

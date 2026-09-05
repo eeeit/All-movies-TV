@@ -1,6 +1,4 @@
 /* eslint-disable no-console,@typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
-
 import type {
   ApiErrorResponse,
   AuthErrorResponse,
@@ -9,6 +7,7 @@ import type {
   LoginApiCredentialRequest,
   LoginApiLocalRequest,
 } from '@shared/api-contract';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { serializeAuthPayload } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
@@ -18,8 +17,10 @@ const STORAGE_TYPE =
   (process.env.NEXT_PUBLIC_STORAGE_TYPE as
     | 'localstorage'
     | 'redis'
-    | 'd1'
     | undefined) || 'localstorage';
+
+// 认证 cookie 仅在生产环境要求 HTTPS，避免本地 HTTP 调试无法写入
+const AUTH_COOKIE_SECURE = process.env.NODE_ENV === 'production';
 
 // 生成签名
 async function generateSignature(
@@ -70,17 +71,6 @@ async function createAuthPayload(
   }
 
   return authData;
-}
-
-// 生成认证Cookie（带签名）
-async function generateAuthCookie(
-  username?: string,
-  password?: string,
-  includePassword = false
-): Promise<string> {
-  return serializeAuthPayload(
-    await createAuthPayload(username, password, includePassword)
-  );
 }
 
 export async function POST(req: NextRequest) {
@@ -136,7 +126,7 @@ export async function POST(req: NextRequest) {
         expires,
         sameSite: 'lax', // 改为 lax 以支持 PWA
         httpOnly: false, // PWA 需要客户端可访问
-        secure: false, // 根据协议自动设置
+        secure: AUTH_COOKIE_SECURE, // 生产环境强制 HTTPS
       });
 
       return response;
@@ -176,7 +166,7 @@ export async function POST(req: NextRequest) {
         expires,
         sameSite: 'lax', // 改为 lax 以支持 PWA
         httpOnly: false, // PWA 需要客户端可访问
-        secure: false, // 根据协议自动设置
+        secure: AUTH_COOKIE_SECURE, // 生产环境强制 HTTPS
       });
 
       return response;
@@ -216,7 +206,7 @@ export async function POST(req: NextRequest) {
         expires,
         sameSite: 'lax', // 改为 lax 以支持 PWA
         httpOnly: false, // PWA 需要客户端可访问
-        secure: false, // 根据协议自动设置
+        secure: AUTH_COOKIE_SECURE, // 生产环境强制 HTTPS
       });
 
       return response;

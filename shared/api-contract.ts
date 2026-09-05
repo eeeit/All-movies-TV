@@ -1,4 +1,5 @@
-export type StorageType = 'localstorage' | 'redis' | 'd1' | 'upstash' | string;
+export type StorageType = 'localstorage' | 'redis' | 'upstash' | string;
+export type SourceProvider = 'maccms' | 'internet-archive' | string;
 
 export interface ApiErrorResponse {
   error: string;
@@ -10,6 +11,7 @@ export interface ApiSite {
   api: string;
   name: string;
   detail?: string;
+  provider?: SourceProvider;
 }
 
 export interface PlayRecord {
@@ -151,6 +153,7 @@ export interface AdminConfig {
     name: string;
     api: string;
     detail?: string;
+    provider?: SourceProvider;
     from: 'config' | 'custom';
     disabled?: boolean;
   }[];
@@ -288,6 +291,7 @@ export type AdminSourceApiRequest =
       name: string;
       api: string;
       detail?: string;
+      provider?: SourceProvider;
     }
   | {
       action: 'disable' | 'enable' | 'delete';
@@ -364,7 +368,7 @@ export interface ImageProxyApiQuery {
   url: string;
 }
 
-export interface ImageProxyApiErrorResponse extends ApiErrorResponse {}
+export type ImageProxyApiErrorResponse = ApiErrorResponse;
 
 export interface CronApiSuccessResponse {
   success: true;

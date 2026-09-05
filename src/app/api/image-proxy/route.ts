@@ -1,12 +1,10 @@
-import { NextResponse } from 'next/server';
-
-import http from 'node:http';
-import https from 'node:https';
-
 import type {
   ImageProxyApiErrorResponse,
   ImageProxyApiQuery,
 } from '@shared/api-contract';
+import { NextResponse } from 'next/server';
+import http from 'node:http';
+import https from 'node:https';
 
 const IMAGE_PROXY_REFERER = 'https://movie.douban.com/';
 const IMAGE_PROXY_USER_AGENT =
@@ -55,6 +53,66 @@ function parseRemoteImageUrl(imageUrl: string): URL {
   }
 }
 
+function normalizeHostname(hostname: string): string {
+  const host = hostname.toLowerCase();
+  if (host.startsWith('[') && host.endsWith(']')) {
+    return host.slice(1, -1);
+  }
+  return host;
+}
+
+function isPrivateIpv4(host: string): boolean {
+  const octets = host.split('.');
+  if (octets.length !== 4) {
+    return false;
+  }
+
+  const nums = octets.map((part) => Number(part));
+  if (
+    nums.some((value) => !Number.isInteger(value) || value < 0 || value > 255)
+  ) {
+    return false;
+  }
+
+  const [a, b] = nums;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true; // link-local + 云元数据
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  return false;
+}
+
+function isPrivateIpv6(host: string): boolean {
+  if (host === '::1' || host === '::') return true;
+
+  const mappedV4 = host.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
+  if (mappedV4) return isPrivateIpv4(mappedV4[1]);
+
+  return /^f[cd][0-9a-f]{2}:/.test(host) || /^fe[89ab][0-9a-f]:/.test(host);
+}
+
+function isBlockedImageHost(hostname: string): boolean {
+  const host = normalizeHostname(hostname);
+  if (!host) return true;
+  if (host === 'localhost' || host.endsWith('.localhost')) return true;
+  if (host.includes(':')) return isPrivateIpv6(host);
+  // 整数/十六进制形式的 IP 可绕过点分校验，一律拒绝
+  if (/^\d+$/.test(host) || /^0x[0-9a-f]+$/.test(host)) return true;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return isPrivateIpv4(host);
+  return false;
+}
+
+function assertSafeRemoteImageUrl(url: URL): void {
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('Unsupported image URL protocol');
+  }
+
+  if (isBlockedImageHost(url.hostname)) {
+    throw new Error('Blocked private image host');
+  }
+}
+
 function applyImageCacheHeaders(headers: Headers): void {
   headers.set('Cache-Control', 'public, max-age=15720000, s-maxage=15720000');
   headers.set('CDN-Cache-Control', 'public, s-maxage=15720000');
@@ -77,6 +135,7 @@ function fetchRemoteImage(
   redirectCount = 0
 ): Promise<{ contentType?: string; body: Buffer }> {
   const parsedUrl = parseRemoteImageUrl(imageUrl);
+  assertSafeRemoteImageUrl(parsedUrl);
   const allowInsecureTls = shouldAllowInsecureTls(
     parsedUrl.hostname.toLowerCase()
   );

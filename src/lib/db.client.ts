@@ -72,7 +72,6 @@ const STORAGE_TYPE = (() => {
     (process.env.STORAGE_TYPE as
       | 'localstorage'
       | 'redis'
-      | 'd1'
       | 'upstash'
       | undefined) ||
     'localstorage';

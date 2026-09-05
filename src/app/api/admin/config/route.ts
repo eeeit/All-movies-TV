@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 
-import { NextRequest, NextResponse } from 'next/server';
-
 import type { AdminConfigResult, ApiErrorResponse } from '@shared/api-contract';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
@@ -24,16 +23,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const config = await getConfig();
-    const result: AdminConfigResult = {
-      Role: 'owner',
-      Config: config,
-    };
+    let role: AdminConfigResult['Role'];
     if (username === process.env.USERNAME) {
-      result.Role = 'owner';
+      role = 'owner';
     } else {
       const user = config.UserConfig.Users.find((u) => u.username === username);
       if (user && user.role === 'admin') {
-        result.Role = 'admin';
+        role = 'admin';
       } else {
         const errorBody: ApiErrorResponse = {
           error: '你是管理员吗你就访问？',
@@ -41,6 +37,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(errorBody, { status: 401 });
       }
     }
+    const result: AdminConfigResult = { Role: role, Config: config };
 
     return NextResponse.json(result, {
       headers: {

@@ -8,12 +8,11 @@ import {
 } from 'react';
 
 import {
+  type Locale,
   DEFAULT_LOCALE,
   getDocumentLang,
   LOCALE_STORAGE_KEY,
-  normalizeLocale,
   translate,
-  type Locale,
 } from '@/lib/i18n';
 
 interface LanguageContextValue {
@@ -59,7 +58,7 @@ export function LanguageProvider({
 
   const value = useMemo(
     () => ({ locale, setLocale, toggleLocale, t }),
-    [locale, setLocale, toggleLocale, t],
+    [locale, setLocale, toggleLocale, t]
   );
 
   return (

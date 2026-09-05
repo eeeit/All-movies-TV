@@ -6,6 +6,7 @@ import type {
   PlayRecord as SharedPlayRecord,
 } from '@shared/api-contract';
 
+import { apiClient } from './api-client';
 /**
  * 仅在浏览器端使用的数据库工具，目前基于 localStorage 实现。
  * 之所以单独拆分文件，是为了避免在客户端 bundle 中引入 `fs`, `path` 等 Node.js 内置模块，
@@ -18,9 +19,7 @@ import type {
  *
  * 如后续需要在客户端读取收藏等其它数据，可按同样方式在此文件中补充实现。
  */
-
 import { getAuthInfoFromBrowserCookie } from './auth';
-import { apiClient } from './api-client';
 
 // ---- 类型 ----
 export interface PlayRecord {
@@ -78,7 +77,6 @@ const STORAGE_TYPE = (() => {
       : (import.meta.env.VITE_STORAGE_TYPE as
           | 'localstorage'
           | 'redis'
-          | 'd1'
           | 'upstash'
           | undefined);
 

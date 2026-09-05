@@ -160,7 +160,13 @@ export class RedisStorage implements IStorage {
 
   async registerUser(userName: string, password: string): Promise<void> {
     // 简单存储明文密码，生产环境应加密
-    await withRetry(() => this.client.set(this.userPwdKey(userName), password));
+    // 使用 NX 原子操作，避免并发注册/绕过预检时覆盖已存在用户的密码
+    const result = await withRetry(() =>
+      this.client.set(this.userPwdKey(userName), password, { NX: true })
+    );
+    if (result === null) {
+      throw new Error('用户已存在');
+    }
   }
 
   async verifyUser(userName: string, password: string): Promise<boolean> {

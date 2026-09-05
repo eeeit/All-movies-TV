@@ -56,15 +56,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (theme !== 'system') return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => setThemeState((prev) => (prev === 'system' ? 'system' : prev));
+    const handler = () =>
+      setThemeState((prev) => (prev === 'system' ? 'system' : prev));
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, [theme]);
 
   const value = useMemo(
     () => ({ theme, resolvedTheme, setTheme }),
-    [theme, resolvedTheme, setTheme],
+    [theme, resolvedTheme, setTheme]
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }

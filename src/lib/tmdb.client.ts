@@ -5,7 +5,7 @@ interface TmdbTrendingParams {
 }
 
 export async function getTmdbTrending(
-  params: TmdbTrendingParams,
+  params: TmdbTrendingParams
 ): Promise<TmdbResult> {
   const response = await fetch(`/api/tmdb/trending?type=${params.type}`);
 

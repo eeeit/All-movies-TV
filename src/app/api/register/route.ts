@@ -1,12 +1,11 @@
 /* eslint-disable no-console,@typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
-
 import type {
   ApiErrorResponse,
   AuthPayload,
   AuthSuccessResponse,
   RegisterApiRequest,
 } from '@shared/api-contract';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { serializeAuthPayload } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
@@ -16,8 +15,10 @@ const STORAGE_TYPE =
   (process.env.NEXT_PUBLIC_STORAGE_TYPE as
     | 'localstorage'
     | 'redis'
-    | 'd1'
     | undefined) || 'localstorage';
+
+// 认证 cookie 仅在生产环境要求 HTTPS，避免本地 HTTP 调试无法写入
+const AUTH_COOKIE_SECURE = process.env.NODE_ENV === 'production';
 
 // 生成签名
 async function generateSignature(
@@ -59,11 +60,6 @@ async function createAuthPayload(username: string): Promise<AuthPayload> {
   authData.signature = signature;
 
   return authData;
-}
-
-// 生成认证Cookie（带签名）
-async function generateAuthCookie(username: string): Promise<string> {
-  return serializeAuthPayload(await createAuthPayload(username));
 }
 
 export async function POST(req: NextRequest) {
@@ -131,11 +127,16 @@ export async function POST(req: NextRequest) {
         expires,
         sameSite: 'lax', // 改为 lax 以支持 PWA
         httpOnly: false, // PWA 需要客户端可访问
-        secure: false, // 根据协议自动设置
+        secure: AUTH_COOKIE_SECURE, // 生产环境强制 HTTPS
       });
 
       return response;
     } catch (err) {
+      // registerUser 在用户名并发冲突时会抛出该错误（原子 NX 兜底，非仅靠前置的 checkUserExist）
+      if (err instanceof Error && err.message === '用户已存在') {
+        const errorBody: ApiErrorResponse = { error: '用户已存在' };
+        return NextResponse.json(errorBody, { status: 400 });
+      }
       console.error('数据库注册失败', err);
       const errorBody: ApiErrorResponse = { error: '数据库错误' };
       return NextResponse.json(errorBody, { status: 500 });

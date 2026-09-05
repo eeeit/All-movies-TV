@@ -5,7 +5,7 @@ interface TraktTrendingParams {
 }
 
 export async function getTraktTrending(
-  params: TraktTrendingParams,
+  params: TraktTrendingParams
 ): Promise<TraktResult> {
   const response = await fetch(`/api/trakt/trending?type=${params.type}`);
 

@@ -1,9 +1,5 @@
+import type { ApiErrorResponse, SearchApiResponse } from '@shared/api-contract';
 import { NextResponse } from 'next/server';
-
-import type {
-  ApiErrorResponse,
-  SearchApiResponse,
-} from '@shared/api-contract';
 
 import { getAvailableApiSites, getCacheTime } from '@/lib/config';
 import { searchFromApi } from '@/lib/downstream';
@@ -14,14 +10,11 @@ export async function GET(request: Request) {
   if (!query) {
     const cacheTime = await getCacheTime();
     const responseBody: SearchApiResponse = { results: [] };
-    return NextResponse.json(
-      responseBody,
-      {
-        headers: {
-          'Cache-Control': `public, max-age=${cacheTime}`,
-        },
-      }
-    );
+    return NextResponse.json(responseBody, {
+      headers: {
+        'Cache-Control': `public, max-age=${cacheTime}`,
+      },
+    });
   }
 
   const apiSites = await getAvailableApiSites();
@@ -35,14 +28,11 @@ export async function GET(request: Request) {
       results: flattenedResults,
     };
 
-    return NextResponse.json(
-      responseBody,
-      {
-        headers: {
-          'Cache-Control': `public, max-age=${cacheTime}`,
-        },
-      }
-    );
+    return NextResponse.json(responseBody, {
+      headers: {
+        'Cache-Control': `public, max-age=${cacheTime}`,
+      },
+    });
   } catch (error) {
     const errorBody: ApiErrorResponse = { error: '搜索失败' };
     return NextResponse.json(errorBody, { status: 500 });

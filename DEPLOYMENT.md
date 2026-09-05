@@ -79,24 +79,24 @@ git clone <your-repo-url> .
 2. 在项目根目录复制最低成本环境变量示例：
 
 ```bash
-cp .env.ecs.local.example .env.ecs.local
+cp .env.local.example .env.local
 ```
 
-3. 修改 `.env.ecs.local`，至少设置以下值：
+3. 修改 `.env.local`，至少设置以下值：
 
 - `PASSWORD`
 
 4. 启动服务：
 
 ```bash
-docker compose --env-file .env.ecs.local -f docker-compose.ecs.local.yml up -d --build
+docker compose --env-file .env.local -f docker-compose.local.yml up -d --build
 ```
 
 5. 查看状态：
 
 ```bash
-docker compose -f docker-compose.ecs.local.yml ps
-docker compose -f docker-compose.ecs.local.yml logs -f app
+docker compose -f docker-compose.local.yml ps
+docker compose -f docker-compose.local.yml logs -f app
 ```
 
 ### 方案 B：单机 Redis，同步功能更完整
@@ -114,10 +114,10 @@ git clone <your-repo-url> .
 2. 在项目根目录复制环境变量示例：
 
 ```bash
-cp .env.ecs.example .env.ecs
+cp .env.example .env
 ```
 
-3. 修改 `.env.ecs`，至少设置以下值：
+3. 修改 `.env`，至少设置以下值：
 
 - `PASSWORD`
 - `USERNAME`
@@ -126,20 +126,20 @@ cp .env.ecs.example .env.ecs
 4. 启动服务：
 
 ```bash
-docker compose --env-file .env.ecs -f docker-compose.ecs.yml up -d --build
+docker compose --env-file .env -f docker-compose.yml up -d --build
 ```
 
 5. 查看状态：
 
 ```bash
-docker compose -f docker-compose.ecs.yml ps
-docker compose -f docker-compose.ecs.yml logs -f app
+docker compose -f docker-compose.yml ps
+docker compose -f docker-compose.yml logs -f app
 ```
 
 ## 域名和反向代理
 
 1. 将域名 A 记录指向 ECS 公网 IP。
-2. 将 [deploy/nginx/moontv.conf](../deploy/nginx/moontv.conf) 放到 `/etc/nginx/conf.d/moontv.conf`。
+2. 将 [nginx/moontv.conf](nginx/moontv.conf) 放到 `/etc/nginx/conf.d/moontv.conf`。
 3. 把 `server_name` 改成你的域名。
 4. 检查并重载 Nginx：
 
@@ -165,7 +165,7 @@ sudo certbot --nginx -d your-domain.com
 
 ```bash
 git pull
-docker compose --env-file .env.ecs.local -f docker-compose.ecs.local.yml up -d --build
+docker compose --env-file .env.local -f docker-compose.local.yml up -d --build
 ```
 
 如果你不是在服务器上直接 `git pull`，而是走本地打包再上传，请先在本地重新生成部署产物：
@@ -180,7 +180,7 @@ pnpm run build:deploy-stage
 
 ```bash
 git pull
-docker compose --env-file .env.ecs -f docker-compose.ecs.yml up -d --build
+docker compose --env-file .env -f docker-compose.yml up -d --build
 ```
 
 如果你走的是本地打包上传，同样先执行：
@@ -197,8 +197,8 @@ pnpm run build:deploy-stage
 
 ## 回滚与排障
 
-- localstorage 方案容器未启动：先看 `docker compose -f docker-compose.ecs.local.yml logs app`
-- Redis 方案容器未启动：先看 `docker compose -f docker-compose.ecs.yml logs app`
-- Redis 未就绪：看 `docker compose -f docker-compose.ecs.yml logs redis`
+- localstorage 方案容器未启动：先看 `docker compose -f docker-compose.local.yml logs app`
+- Redis 方案容器未启动：先看 `docker compose -f docker-compose.yml logs app`
+- Redis 未就绪：看 `docker compose -f docker-compose.yml logs redis`
 - 页面能打开但静态资源异常：优先确认 Nginx 反代是否仍指向 3000，且没有缓存旧构建
 - 修改 `config.json` 后未生效：重启应用容器，应用会在启动时重新读取挂载的配置文件

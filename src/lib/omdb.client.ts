@@ -6,12 +6,12 @@ interface OmdbLookupParams {
 }
 
 export async function getOmdbLookup(
-  params: OmdbLookupParams,
+  params: OmdbLookupParams
 ): Promise<OmdbResult> {
   const response = await fetch(
     `/api/omdb/search?q=${encodeURIComponent(params.query)}${
       params.type ? `&type=${params.type}` : ''
-    }`,
+    }`
   );
 
   if (!response.ok) {
